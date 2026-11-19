@@ -58,6 +58,9 @@
         "rules": {
           "style": {
             "noDescendingSpecificity": "off"
+          },
+          "complexity": {
+            "noImportantStyles": "off"
           }
         }
       }
