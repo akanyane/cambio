@@ -1,7 +1,7 @@
 export interface Motion {
-  /** false logo após carregar/navegar: os dígitos partem de 0. */
+  /** false right after loading/navigating: digits start from 0. */
   booted: boolean;
-  /** Alterna entre draw-a / draw-b para reiniciar as animações de traço. */
+  /** Toggles between draw-a / draw-b to restart stroke animations. */
   drawCls: string;
   rollCls: string;
 }

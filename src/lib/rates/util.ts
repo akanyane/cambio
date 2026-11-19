@@ -1,6 +1,6 @@
 import type { Observation } from './types';
 
-/** Data local em yyyy-mm-dd. */
+/** Local date as yyyy-mm-dd. */
 export const todayISO = (d = new Date()) => d.toLocaleDateString('sv-SE');
 
 export function isoMinusDays(iso: string, days: number): string {
@@ -9,7 +9,7 @@ export function isoMinusDays(iso: string, days: number): string {
   return dt.toISOString().slice(0, 10);
 }
 
-/** Data de um timestamp num fuso, em yyyy-mm-dd. */
+/** Date of a timestamp in a time zone, as yyyy-mm-dd. */
 export const isoInTz = (ms: number, timeZone: string) => new Date(ms).toLocaleDateString('sv-SE', { timeZone });
 
 export async function getJSON<T>(url: string, timeoutMs = 12000): Promise<T> {
@@ -17,7 +17,7 @@ export async function getJSON<T>(url: string, timeoutMs = 12000): Promise<T> {
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
     const r = await fetch(url, { signal: ctl.signal });
-    if (!r.ok) throw new Error(`HTTP ${r.status} em ${url}`);
+    if (!r.ok) throw new Error(`HTTP ${r.status} at ${url}`);
     return (await r.json()) as T;
   } finally {
     clearTimeout(t);
@@ -25,8 +25,8 @@ export async function getJSON<T>(url: string, timeoutMs = 12000): Promise<T> {
 }
 
 /**
- * Alinha observações irregulares ao calendário de sessões, repetindo o último valor conhecido.
- * Antes da primeira observação usa a primeira disponível.
+ * Aligns irregular observations to the session calendar, carrying the last known value forward.
+ * Before the first observation, the first available value is used.
  */
 export function align(dates: string[], obs: Observation[]): number[] | null {
   const sorted = obs

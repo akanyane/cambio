@@ -29,7 +29,7 @@ const parsePath = (p: string): { page: Page; code?: string } => {
   return code && BY[code] ? { page: 'detail', code } : { page: 'home' };
 };
 const valid = (c: string, fb: string) => (BY[c] ? c : fb);
-/** A moeda vista não pode ser a própria base. */
+/** The viewed currency can't be the base itself. */
 const notBase = (c: string, base: string) => (c === base ? (base === 'USD' ? 'EUR' : 'USD') : c);
 
 export default function App({ initialPage = 'home', initialDetail = 'USD' }: Props) {
@@ -60,7 +60,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
   const detail = notBase(detailRaw, base);
   const motion: Motion = { booted, drawCls: drawN % 2 ? 'draw-b' : 'draw-a', rollCls: drawN % 2 ? 'roll-b' : 'roll-a' };
 
-  // ---------- tema ----------
+  // ---------- theme ----------
   useEffect(() => {
     const dark = theme === 'dark';
     document.documentElement.classList.toggle('dark', dark);
@@ -81,7 +81,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
     timers.current = [setTimeout(() => setTheme(to), 400), setTimeout(() => setCurtain(null), 980)];
   };
 
-  // ---------- entrada: dígitos partem de 0 ----------
+  // ---------- entrance: digits start from 0 ----------
   const bootT = useRef<ReturnType<typeof setTimeout>>(undefined);
   const ready = data !== null;
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
     bootT.current = setTimeout(() => setBooted(true), 90);
   }, []);
 
-  // ---------- navegação (History API) ----------
+  // ---------- navigation (History API) ----------
   const go = useCallback(
     (to: Page, code?: string, push = true) => {
       setPage(to);
@@ -110,7 +110,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
         try {
           window.scrollTo({ top: 0, behavior: reduced ? 'auto' : 'smooth' });
         } catch {
-          /* sem rolagem */
+          /* no scrolling */
         }
       }
     },
@@ -134,7 +134,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
     setAlertOpen(null);
   };
 
-  // ---------- atualização ao vivo: piscar valores que mudaram ----------
+  // ---------- live updates: flash values that changed ----------
   const prevVals = useRef<{ base: string; vals: Record<string, number> } | null>(null);
   const flashN = useRef(0);
   const live = data?.live;
@@ -155,7 +155,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
     if (Object.keys(f).length) setFlash(f);
   }, [live, base]);
 
-  // ---------- alertas ----------
+  // ---------- alerts ----------
   useEffect(() => {
     if (!data) return;
     const { next, fired } = checkAlerts(data, alerts);
@@ -168,7 +168,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
         try {
           new Notification('Alerta de preço · Câmbio', { body: f.text, icon: '/favicon.svg', tag: `alert-${f.code}` });
         } catch {
-          /* sem suporte */
+          /* not supported */
         }
       });
     }
@@ -214,7 +214,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
 
   const togglePin = (code: string) => setPins(pins.includes(code) ? pins.filter((p) => p !== code) : [...pins, code]);
 
-  // ---------- título da aba ----------
+  // ---------- tab title ----------
   useEffect(() => {
     if (!data) return;
     document.title =
@@ -325,7 +325,7 @@ function Loading() {
 
 function Colophon({ data }: { data: MarketData | null }) {
   const sample = data?.sample;
-  const anySample = data && Object.values(data.sources).includes('exemplo');
+  const anySample = data && Object.values(data.sources).includes('sample');
   return (
     <footer className="colo">
       <div className="wrap colo-in">

@@ -1,4 +1,4 @@
-// Frankfurter — taxas de referência do Banco Central Europeu, diárias, sem chave.
+// Frankfurter: European Central Bank reference rates, daily, no API key.
 // https://frankfurter.dev
 import { getJSON } from './util';
 
@@ -32,7 +32,7 @@ interface LatestResp {
   rates: Record<string, number>;
 }
 
-/** Série diária (dias úteis) a partir de `start`, base USD. */
+/** Daily series (business days) from `start`, USD base. */
 export async function fetchFrankfurterSeries(start: string, codes = FRANKFURTER_CODES) {
   const j = await getJSON<SeriesResp>(`${API}/${start}..?base=USD&symbols=${codes.join(',')}`, 20000);
   const dates = Object.keys(j.rates).sort();

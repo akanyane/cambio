@@ -1,17 +1,17 @@
 export interface Currency {
   code: string;
   name: string;
-  /** Símbolo usado antes de valores (US$, R$…). */
+  /** Symbol shown before values (US$, R$…). */
   sym: string;
-  /** Glifo decorativo dos cards. */
+  /** Decorative glyph on the cards. */
   tile: string;
-  /** Gênero gramatical feminino ("da libra", "uma rupia"). */
+  /** Feminine grammatical gender in Portuguese ("da libra", "uma rupia"). */
   fem: boolean;
-  /** Parâmetros do gerador de exemplo (fallback offline). */
+  /** Sample generator parameters (offline fallback). */
   sample: { rate: number; vol: number; drift: number };
 }
 
-// código, nome, símbolo, glifo, unidades por 1 USD (exemplo), volatilidade diária, tendência, feminino
+// code, name (pt-BR), symbol, glyph, units per 1 USD (sample), daily volatility, drift, feminine
 const RAW: [string, string, string, string, number, number, number, number][] = [
   ['USD', 'Dólar americano', 'US$', '$', 1, 0, 0, 0],
   ['BRL', 'Real brasileiro', 'R$', 'R$', 5.42, 0.0045, 0, 0],

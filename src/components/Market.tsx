@@ -34,7 +34,7 @@ interface Props {
   onOpen: (code: string) => void;
 }
 
-/** Ordem dos cards: fixadas primeiro, sempre sem a base. */
+/** Card order: pinned first, never including the base. */
 export function orderedCodes(base: string, pins: string[]) {
   const others = GRID.filter((c) => c !== base);
   return others.filter((c) => pins.includes(c)).concat(others.filter((c) => !pins.includes(c)));

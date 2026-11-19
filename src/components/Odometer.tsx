@@ -4,11 +4,11 @@ interface Props {
   value: string;
   booted: boolean;
   rollCls: string;
-  /** Número fixo de casas, para que cada coluna mantenha sua identidade entre valores. */
+  /** Fixed number of slots, so each column keeps its identity across values. */
   slots?: number;
 }
 
-/** Cada dígito é uma coluna 0–9 movida por translateY; atraso da direita para a esquerda. */
+/** Each digit is a 0–9 column moved by translateY, staggered right to left. */
 export function Odometer({ value, booted, rollCls, slots = 15 }: Props) {
   const cells = [];
   for (let k = 0; k < slots; k++) {
@@ -45,7 +45,7 @@ export function Odometer({ value, booted, rollCls, slots = 15 }: Props) {
   );
 }
 
-/** Valor grande com texto para leitores de tela. */
+/** Large value with screen-reader text. */
 export function OdoValue({ value, flash, ...rest }: Props & { flash?: string }) {
   return (
     <span className={`big-num ${flash ?? ''}`}>

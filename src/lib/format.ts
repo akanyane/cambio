@@ -4,7 +4,7 @@ const cache: Record<number, Intl.NumberFormat> = {};
 export const nf = (d: number) =>
   (cache[d] ??= new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d }));
 
-/** ≥ 100 → 2 casas; 0,01–100 → 4; menores → 6 ou 8. */
+/** ≥ 100 → 2 decimals; 0.01–100 → 4; smaller → 6 or 8. */
 export function fmt(v: number): string {
   const a = Math.abs(v);
   const d = a >= 100 ? 2 : a >= 0.01 ? 4 : a >= 0.0001 ? 6 : 8;
@@ -30,8 +30,8 @@ export function parseAmt(s: string): number {
 
 export const p2 = (n: number) => String(n).padStart(2, '0');
 
-export const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
-export const MESL = [
+export const MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+export const MONTHS_LONG = [
   'janeiro',
   'fevereiro',
   'março',
@@ -45,14 +45,22 @@ export const MESL = [
   'novembro',
   'dezembro',
 ];
-export const DIA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+export const WEEKDAYS = [
+  'Domingo',
+  'Segunda-feira',
+  'Terça-feira',
+  'Quarta-feira',
+  'Quinta-feira',
+  'Sexta-feira',
+  'Sábado',
+];
 
-/** Remove acentos e caixa para busca. */
+/** Strips accents and case for search. */
 export const fold = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
 
 export const lede = (c: Currency) => (c.fem ? 'Uma ' : 'Um ') + c.name.charAt(0).toLowerCase() + c.name.slice(1);
 
-/** 'yyyy-mm-dd' → Date local (meia-noite). */
+/** 'yyyy-mm-dd' → local Date (midnight). */
 export function parseISO(iso: string): Date {
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(y, m - 1, d);
@@ -60,17 +68,17 @@ export function parseISO(iso: string): Date {
 
 export const dayMonth = (iso: string) => {
   const d = parseISO(iso);
-  return `${p2(d.getDate())} ${MES[d.getMonth()]}`;
+  return `${p2(d.getDate())} ${MONTHS[d.getMonth()]}`;
 };
 
 export const longDay = (iso: string) => {
   const d = parseISO(iso);
-  return `${p2(d.getDate())} ${MES[d.getMonth()]} ${d.getFullYear()}`;
+  return `${p2(d.getDate())} ${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
 };
 
 export const monthYear = (iso: string) => {
   const d = parseISO(iso);
-  return `${MES[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
+  return `${MONTHS[d.getMonth()]} ${String(d.getFullYear()).slice(2)}`;
 };
 
 export const clockStr = (d: Date) => `${p2(d.getHours())}:${p2(d.getMinutes())}:${p2(d.getSeconds())}`;

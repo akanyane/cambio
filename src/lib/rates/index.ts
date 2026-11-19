@@ -1,12 +1,12 @@
 /**
- * Camada `rates`: junta as fontes num único formato.
+ * `rates` layer: merges every source into a single shape.
  *
- *  - Histórico fiat (17 moedas): Frankfurter / BCE — define o calendário de sessões.
- *  - Histórico ARS, CLP, COP:    AwesomeAPI (diário).
- *  - Histórico BTC:              Binance (klines diárias).
- *  - Ao vivo, fiat (20 moedas):  AwesomeAPI /last, consultada periodicamente.
- *  - Ao vivo, BTC:               Binance WebSocket (ver binance.ts).
- *  - Fallback:                   Frankfurter /latest e, por fim, gerador de exemplo.
+ *  - Fiat history (17 currencies): Frankfurter / ECB, which defines the session calendar.
+ *  - ARS, CLP, COP history:        AwesomeAPI (daily).
+ *  - BTC history:                  Binance (daily klines).
+ *  - Live fiat (20 currencies):    AwesomeAPI /last, polled periodically.
+ *  - Live BTC:                     Binance WebSocket (see binance.ts).
+ *  - Fallback:                     Frankfurter /latest and, finally, the sample generator.
  */
 import { BY, CODES } from '../currencies';
 import { fetchAwesomeDaily, fetchAwesomeLive } from './awesome';
@@ -22,7 +22,7 @@ export type { LiveUpdate, MarketData } from './types';
 
 const AWESOME_HIST = ['ARS', 'CLP', 'COP'];
 const LIVE_FIAT = CODES.filter((c) => c !== 'USD' && c !== 'BTC');
-const CACHE_KEY = 'vantage:history:v1';
+const CACHE_KEY = 'cambio:history:v1';
 const CACHE_TTL = 6 * 3600 * 1000;
 
 type History = Pick<MarketData, 'dates' | 'closes' | 'sources'>;
@@ -44,7 +44,7 @@ function writeCache(today: string, h: History) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ ...h, day: today, at: Date.now() }));
   } catch {
-    /* armazenamento indisponível */
+    /* storage unavailable */
   }
 }
 
@@ -64,7 +64,7 @@ async function loadHistory(today: string): Promise<History | null> {
   if (dates.length < 30) return null;
 
   const closes: History['closes'] = { USD: dates.map(() => 1) };
-  const sources: History['sources'] = { USD: 'fixo' };
+  const sources: History['sources'] = { USD: 'fixed' };
   const put = (code: string, obs: Observation[] | null, src: History['sources'][string]) => {
     const a = obs ? align(dates, obs) : null;
     if (a) {
@@ -73,7 +73,7 @@ async function loadHistory(today: string): Promise<History | null> {
     }
   };
 
-  for (const c of FRANKFURTER_CODES) put(c, fr.value.series[c], 'BCE');
+  for (const c of FRANKFURTER_CODES) put(c, fr.value.series[c], 'ECB');
   if (btc.status === 'fulfilled')
     put(
       'BTC',
@@ -90,7 +90,7 @@ async function loadHistory(today: string): Promise<History | null> {
   return h;
 }
 
-/** Cotações atuais de todas as moedas que as fontes ao vivo conseguirem entregar. */
+/** Current quotes for every currency the live sources can deliver. */
 export async function fetchLive(): Promise<LiveUpdate> {
   const [aw, btc] = await Promise.allSettled([fetchAwesomeLive(LIVE_FIAT), fetchBtcPrice()]);
   const out: LiveUpdate = aw.status === 'fulfilled' ? { ...aw.value } : {};
@@ -104,13 +104,13 @@ export async function fetchLive(): Promise<LiveUpdate> {
         if (l.rates[c]) out[c] = { value: l.rates[c] };
       });
     } catch {
-      /* fica com o último fechamento */
+      /* keep the last close */
     }
   }
   return out;
 }
 
-/** Aplica cotações ao vivo; o fechamento anterior da fonte ao vivo corrige o último fechamento. */
+/** Applies live quotes; the live source's previous close overrides the last close. */
 export function applyLive(d: MarketData, upd: LiveUpdate): MarketData {
   const live = { ...d.live };
   let closes = d.closes;
@@ -134,7 +134,7 @@ export function applyLive(d: MarketData, upd: LiveUpdate): MarketData {
   return changed ? { ...d, live, closes, asOf: Date.now() } : d;
 }
 
-/** Carrega histórico + ao vivo. Nunca rejeita: na falta das APIs, volta com dados de exemplo. */
+/** Loads history + live quotes. Never rejects: falls back to sample data if the APIs are down. */
 export async function loadMarket(): Promise<MarketData> {
   const today = todayISO();
   const [hist, live] = await Promise.all([
@@ -149,10 +149,10 @@ export async function loadMarket(): Promise<MarketData> {
   const base: Record<string, number> = {};
   CODES.forEach((c) => {
     if (!closes[c]) {
-      // moeda sem histórico real: série de exemplo terminando na cotação atual, se houver
+      // currency without real history: sample series ending at the current quote, if any
       const end = live[c]?.value ?? BY[c].sample.rate;
       closes[c] = sampleCloses(BY[c], n, end);
-      sources[c] = 'exemplo';
+      sources[c] = 'sample';
     }
     base[c] = closes[c][n - 1];
   });

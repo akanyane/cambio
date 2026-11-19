@@ -1,4 +1,4 @@
-// AwesomeAPI — cotações quase em tempo real (atualiza a cada ~30 s) e histórico diário, sem chave.
+// AwesomeAPI: near-real-time quotes (refreshed every ~30 s) and daily history, no API key.
 // https://docs.awesomeapi.com.br/api-de-moedas
 import type { LiveUpdate, Observation } from './types';
 import { getJSON, isoInTz } from './util';
@@ -11,7 +11,7 @@ interface Quote {
   timestamp: string;
 }
 
-/** Cotação atual de USD em cada moeda. */
+/** Current USD quote in each currency. */
 export async function fetchAwesomeLive(codes: string[]): Promise<LiveUpdate> {
   const pairs = codes.map((c) => `USD-${c}`).join(',');
   const j = await getJSON<Record<string, Quote>>(`${API}/last/${pairs}`);
@@ -26,7 +26,7 @@ export async function fetchAwesomeLive(codes: string[]): Promise<LiveUpdate> {
   return out;
 }
 
-/** Histórico diário (até 360 registros) de USD em `code`, um valor por dia. */
+/** Daily history (up to 360 records) of USD in `code`, one value per day. */
 export async function fetchAwesomeDaily(code: string, days = 360): Promise<Observation[]> {
   const j = await getJSON<Quote[]>(`${API}/daily/USD-${code}/${days}`);
   const byDay = new Map<string, { ts: number; value: number }>();

@@ -1,31 +1,60 @@
-# Câmbio · Vantage
+# Cambio
 
-Painel de cotações editorial, implementado em **Astro + React (TypeScript)** a partir do handoff em `docs/design/`.
+An editorial-style currency dashboard: the world's currencies, seen from where you stand.
+
+**Live:** https://cambio.akanyane.dev
+
+Built with **Astro + React (TypeScript)** from the design handoff in `docs/design/`. The interface is in Brazilian Portuguese.
+
+## Features
+
+- Pick any of 22 currencies as the base; every value is shown from that point of view
+- Market clock for Tokyo, London, New York and São Paulo, plus a scrolling ticker
+- Featured pair with an odometer-style value and a 7-session chart
+- Market view as grid, list or 8×8 cross-rate matrix
+- Converter, pinned currencies and price alerts (with browser notifications)
+- Per-currency detail page (`/moeda/xxx`) with 1M / 6M / 1Y history, 52-week range and volatility
+- Light and dark themes, responsive layout, `prefers-reduced-motion` support
+
+## Getting started
+
+Requires [Bun](https://bun.sh).
 
 ```bash
 bun install
 bun run dev       # http://localhost:4321
-bun run build     # astro check + build estático em dist/
-bun run lint      # Biome (lint + formatação)
+bun run build     # astro check + static build into dist/
+bun run lint      # Biome (lint + format check)
+bun run lint:fix  # apply Biome fixes
 ```
 
-## APIs usadas (todas públicas, sem chave, com CORS)
+## Data sources
 
-| Uso                                                                     | Fonte                                                                         |
-| ----------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Histórico diário de 17 moedas (calendário de sessões)                   | [Frankfurter](https://frankfurter.dev): taxas de referência do BCE            |
-| Histórico de ARS, CLP e COP                                             | [AwesomeAPI](https://docs.awesomeapi.com.br/api-de-moedas), `/json/daily`     |
-| Histórico do BTC                                                        | Binance, `data-api.binance.vision` (klines diárias)                           |
-| Cotação ao vivo de 20 moedas fiat (a cada 60 s, pausa com a aba oculta) | AwesomeAPI, `/json/last`                                                      |
-| BTC em tempo real                                                       | Binance WebSocket (`miniTicker`)                                              |
-| Fallback                                                                | Frankfurter `/latest`; se nada responder, gerador determinístico do protótipo |
+All public, keyless and CORS-enabled, fetched directly from the browser.
 
-APIs do navegador: `Intl` (formatação pt-BR e fusos dos mercados), History API (rotas `/moeda/xxx`), `localStorage` (tema, base, fixadas, alertas, conversor e cache do histórico por 6 h), Notifications (alerta disparado com a aba em segundo plano), Page Visibility e `prefers-reduced-motion` / `prefers-color-scheme`.
+| Purpose                                                                         | Source                                                                                     |
+| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Daily history for 17 currencies (defines the session calendar)                  | [Frankfurter](https://frankfurter.dev): European Central Bank reference rates              |
+| ARS, CLP and COP history                                                        | [AwesomeAPI](https://docs.awesomeapi.com.br/api-de-moedas), `/json/daily`                  |
+| BTC history                                                                     | Binance, `data-api.binance.vision` (daily klines)                                          |
+| Live quotes for 20 fiat currencies (every 60 s, paused while the tab is hidden) | AwesomeAPI, `/json/last`                                                                   |
+| Real-time BTC                                                                   | Binance WebSocket (`miniTicker`)                                                           |
+| Fallback                                                                        | Frankfurter `/latest`; if nothing responds, the prototype's deterministic sample generator |
 
-## Estrutura
+Browser APIs used: `Intl` (pt-BR formatting and market time zones), History API (`/moeda/xxx` routes), `localStorage` (theme, base, pins, alerts, converter and a 6-hour history cache), Notifications, Page Visibility, `prefers-reduced-motion` and `prefers-color-scheme`.
 
-- `src/lib/rates/`: camada de dados. Cada fonte fica num arquivo e `index.ts` junta tudo num `MarketData` (unidades por 1 USD).
-- `src/lib/model.ts`: séries, períodos, escala dos gráficos e volatilidade.
-- `src/components/`: Header/Ticker, BaseSelector, Featured, Market (grade, lista e matriz), Converter, Detail, AlertForm, Odometer.
-- `src/pages/`: `index.astro` e `moeda/[code].astro` (22 páginas estáticas, todas com a mesma ilha React).
-- `src/styles/global.css`: CSS portado do design, sem nenhum `border-radius`.
+Rates are informational only. Do not use them for trading.
+
+## Project structure
+
+- `src/lib/rates/`: data layer. One file per source; `index.ts` merges them into a single `MarketData` shape (units per 1 USD).
+- `src/lib/model.ts`: series, ranges, chart scaling and volatility.
+- `src/components/`: Header/Ticker, BaseSelector, Featured, Market (grid, list, matrix), Converter, Detail, AlertForm, Odometer.
+- `src/pages/`: `index.astro` and `moeda/[code].astro` (22 static pages, all hydrating the same React island).
+- `src/styles/global.css`: CSS ported from the design. No `border-radius` anywhere.
+
+## Releases and deployment
+
+- Commits follow [Conventional Commits](https://www.conventionalcommits.org); [release-please](https://github.com/googleapis/release-please) opens release PRs and publishes GitHub releases.
+- CI runs Biome and the build on every push and pull request.
+- Every push to `main` deploys to Vercel.

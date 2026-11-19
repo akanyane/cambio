@@ -14,6 +14,7 @@ import {
   volatility,
 } from '../lib/model';
 import type { MarketData } from '../lib/rates';
+import { SOURCE_LABEL } from '../lib/rates/types';
 import { AlertForm } from './AlertForm';
 import { sizeCls } from './Featured';
 import { Back, Bell, Pin } from './Icons';
@@ -151,7 +152,8 @@ export function Detail({
             </div>
             <h2 className="dt-title">{XC.name}</h2>
             <p className="dt-sub">
-              {lede(XC)} vale hoje<span className="src">Fonte: {data.sources[X === 'USD' ? base : X]}</span>
+              {lede(XC)} vale hoje
+              <span className="src">Fonte: {SOURCE_LABEL[data.sources[X === 'USD' ? base : X]]}</span>
             </p>
             <div className={`big ${sizeCls(dValStr)}`}>
               <span className="big-sym">{B.sym}</span>

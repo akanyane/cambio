@@ -1,24 +1,24 @@
-/** Todas as taxas são "unidades da moeda por 1 USD". O valor de X na base B é rate[B] / rate[X]. */
+/** All rates are "units of currency per 1 USD". The value of X in base B is rate[B] / rate[X]. */
 export interface MarketData {
-  /** Sessões fechadas (yyyy-mm-dd, crescente), todas anteriores a hoje. */
+  /** Closed sessions (yyyy-mm-dd, ascending), all before today. */
   dates: string[];
-  /** Fechamentos alinhados a `dates`. */
+  /** Closes aligned to `dates`. */
   closes: Record<string, number[]>;
-  /** Cotação atual (hoje, ao vivo). */
+  /** Current quote (today, live). */
   live: Record<string, number>;
-  /** De onde veio cada moeda. */
+  /** Where each currency came from. */
   sources: Record<string, SourceId>;
-  /** true quando nenhuma API respondeu e tudo é gerado localmente. */
+  /** true when no API responded and everything is generated locally. */
   sample: boolean;
-  /** Momento da última atualização ao vivo (ms). */
+  /** Time of the last live update (ms). */
   asOf: number;
 }
 
-export type SourceId = 'fixo' | 'BCE' | 'AwesomeAPI' | 'Binance' | 'exemplo';
+export type SourceId = 'fixed' | 'ECB' | 'AwesomeAPI' | 'Binance' | 'sample';
 
 export interface LiveQuote {
   value: number;
-  /** Fechamento anterior informado pela fonte ao vivo, quando houver. */
+  /** Previous close reported by the live source, when available. */
   prevClose?: number;
 }
 
@@ -28,3 +28,12 @@ export interface Observation {
   date: string;
   value: number;
 }
+
+/** UI label (pt-BR) for each source. */
+export const SOURCE_LABEL: Record<SourceId, string> = {
+  fixed: 'fixo',
+  ECB: 'BCE',
+  AwesomeAPI: 'AwesomeAPI',
+  Binance: 'Binance',
+  sample: 'exemplo',
+};

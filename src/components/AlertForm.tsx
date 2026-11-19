@@ -11,7 +11,7 @@ interface Props {
   onSave: () => void;
   onRemove: () => void;
   onCancel: () => void;
-  /** 'pop' sobre o card; 'dpop' na página de detalhe. */
+  /** 'pop' over the card; 'dpop' on the detail page. */
   variant: 'pop' | 'dpop';
 }
 

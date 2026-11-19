@@ -26,9 +26,9 @@ const {
     <link rel="preconnect" href="https://data-api.binance.vision" crossorigin />
     <title>{title}</title>
     <script is:inline>
-      // aplica o tema antes da pintura para evitar flash
+      // apply the theme before first paint to avoid a flash
       try {
-        var t = JSON.parse(localStorage.getItem('vantage:theme'));
+        var t = JSON.parse(localStorage.getItem('cambio:theme'));
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
       } catch (e) {}
     </script>

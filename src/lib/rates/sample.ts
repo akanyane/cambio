@@ -1,4 +1,4 @@
-// Gerador determinístico do protótipo (mulberry32 + FNV), usado quando as APIs não respondem.
+// Deterministic generator from the prototype (mulberry32 + FNV), used when the APIs don't respond.
 import { CURRENCIES, type Currency, GRID } from '../currencies';
 import type { MarketData } from './types';
 import { todayISO } from './util';
@@ -23,7 +23,7 @@ export function hash(s: string) {
   return h >>> 0;
 }
 
-/** `count` dias úteis anteriores a hoje, em ordem crescente. */
+/** `count` business days before today, ascending. */
 export function businessDays(count: number, from = new Date()): string[] {
   const out: string[] = [];
   const d = new Date(from.getFullYear(), from.getMonth(), from.getDate());
@@ -35,7 +35,7 @@ export function businessDays(count: number, from = new Date()): string[] {
   return out.reverse();
 }
 
-/** Fechamentos de exemplo que terminam em `end` (valor de hoje). */
+/** Sample closes ending at `end` (today's value). */
 export function sampleCloses(c: Currency, n: number, end = c.sample.rate): number[] {
   const { vol, drift } = c.sample;
   if (!vol && !drift) return new Array(n).fill(end);
@@ -58,12 +58,12 @@ export function sampleMarket(sessions = 258): MarketData {
   CURRENCIES.forEach((c) => {
     closes[c.code] = sampleCloses(c, sessions);
     live[c.code] = c.sample.rate;
-    sources[c.code] = c.code === 'USD' ? 'fixo' : 'exemplo';
+    sources[c.code] = c.code === 'USD' ? 'fixed' : 'sample';
   });
   return { dates, closes, live, sources, sample: true, asOf: Date.now() };
 }
 
-/** Oscilação simulada (modo de exemplo): um par da grade a cada chamada. */
+/** Simulated tick (sample mode): one grid pair per call. */
 export function sampleTick(live: Record<string, number>) {
   const pool = GRID.filter((c) => c !== 'USD');
   const code = pool[Math.floor(Math.random() * pool.length)];

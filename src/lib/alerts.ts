@@ -3,7 +3,7 @@ import { BY } from './currencies';
 import { fmt, nf } from './format';
 import type { MarketData } from './rates';
 
-/** Linha de status do alerta de `code` na base atual (ou null). */
+/** Status line for the alert on `code` in the current base (or null). */
 export function alertInfo(data: MarketData, alerts: Record<string, Alert>, code: string, base: string) {
   const a = alerts[code];
   if (!a || a.base !== base) return null;
@@ -14,7 +14,7 @@ export function alertInfo(data: MarketData, alerts: Record<string, Alert>, code:
   return { cls: '', text: `Alerta ${word} ${fmt(a.target)} · faltam ${nf(2).format(dist)}%` };
 }
 
-/** Verifica alertas contra as cotações atuais; devolve os disparados. */
+/** Checks alerts against current quotes; returns the ones that fired. */
 export function checkAlerts(data: MarketData, alerts: Record<string, Alert>) {
   const fired: { code: string; text: string }[] = [];
   let next: Record<string, Alert> | null = null;

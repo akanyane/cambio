@@ -5,16 +5,16 @@ export type Range = '1M' | '6M' | '1A';
 export const RANGE_LABEL: Record<Range, string> = { '1M': '1 mês', '6M': '6 meses', '1A': '1 ano' };
 const RANGE_MONTHS: Record<Range, number> = { '1M': 1, '6M': 6, '1A': 12 };
 
-/** Valor de 1 X expresso em B, agora. */
+/** Current value of 1 X expressed in B. */
 export const pairValue = (d: MarketData, x: string, b: string) => d.live[b] / d.live[x];
 
-/** Valor do fechamento anterior de X em B. */
+/** Previous close of X in B. */
 export const prevOf = (d: MarketData, x: string, b: string) => {
   const k = d.dates.length - 1;
   return d.closes[b][k] / d.closes[x][k];
 };
 
-/** Últimos `count` pontos (os `count − 1` fechamentos mais recentes + hoje). */
+/** Last `count` points (the `count − 1` most recent closes + today). */
 export function series(d: MarketData, x: string, b: string, count: number): number[] {
   const n = d.dates.length;
   const out: number[] = [];
@@ -26,7 +26,7 @@ export function series(d: MarketData, x: string, b: string, count: number): numb
   return out;
 }
 
-/** Datas correspondentes a `series(…, count)`; a última é hoje. */
+/** Dates matching `series(…, count)`; the last one is today. */
 export function seriesDates(d: MarketData, count: number): string[] {
   const n = d.dates.length;
   const out: string[] = [];
@@ -35,7 +35,7 @@ export function seriesDates(d: MarketData, count: number): string[] {
   return out;
 }
 
-/** Quantos pontos (com hoje) cabem no período. */
+/** How many points (including today) fit in the range. */
 export function rangeCount(d: MarketData, r: Range): number {
   const now = new Date();
   const cut = todayISO(new Date(now.getFullYear(), now.getMonth() - RANGE_MONTHS[r], now.getDate()));
@@ -59,7 +59,7 @@ export function scale(s: number[], w: number, h: number, pad: number) {
 export const pathD = (p: [number, number][]) =>
   p.map((q, i) => `${(i ? 'L' : 'M') + q[0].toFixed(1)} ${q[1].toFixed(1)}`).join(' ');
 
-/** Volatilidade anualizada a partir de retornos logarítmicos diários. */
+/** Annualized volatility from daily log returns. */
 export function volatility(s: number[]): number {
   let sum = 0;
   let sum2 = 0;

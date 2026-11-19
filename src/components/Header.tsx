@@ -1,5 +1,5 @@
 import { MARKETS } from '../lib/currencies';
-import { clockStr, DIA, MESL, p2 } from '../lib/format';
+import { clockStr, MONTHS_LONG, p2, WEEKDAYS } from '../lib/format';
 import { useNow } from '../lib/hooks';
 import { Moon, Sun } from './Icons';
 
@@ -34,7 +34,7 @@ function marketRows(now: Date) {
       h = Number(g('hour')) % 24;
       mi = Number(g('minute'));
     } catch {
-      /* fuso indisponível */
+      /* time zone unavailable */
     }
     const t = h + mi / 60;
     const weekday = wd >= 1 && wd <= 5;
@@ -61,7 +61,7 @@ export function Header({ theme, onToggleTheme, live }: Props) {
   const now = useNow();
   const start = new Date(now.getFullYear(), 0, 0);
   const edition = Math.floor((now.getTime() - start.getTime()) / 864e5);
-  const longDate = `${DIA[now.getDay()]}, ${now.getDate()} de ${MESL[now.getMonth()]} de ${now.getFullYear()}`;
+  const longDate = `${WEEKDAYS[now.getDay()]}, ${now.getDate()} de ${MONTHS_LONG[now.getMonth()]} de ${now.getFullYear()}`;
   const letters = ['C', 'â', 'm', 'b', 'i', 'o'];
 
   return (
