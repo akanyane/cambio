@@ -73,7 +73,7 @@ export function BaseSelector({ base, open, setOpen, onPick }: Props) {
                       autoComplete="off"
                       placeholder="Buscar por nome ou código"
                       value={query}
-                      onChange={(e) => setQuery(e.target.value)}
+                      onInput={(e) => setQuery(e.currentTarget.value)}
                       onKeyDown={(e) => {
                         if (e.key === 'Enter' && options[0]) onPick(options[0].code);
                       }}

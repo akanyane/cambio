@@ -24,7 +24,7 @@ function CurSelect({
       <label className="sr" htmlFor={id}>
         {label}
       </label>
-      <select id={id} value={value} onChange={(e) => onChange(e.target.value)}>
+      <select id={id} value={value} onChange={(e) => onChange(e.currentTarget.value)}>
         {CURRENCIES.map((c) => (
           <option key={c.code} value={c.code}>
             {c.code}
@@ -65,7 +65,7 @@ export function Converter({ data }: { data: MarketData }) {
                 inputMode="decimal"
                 autoComplete="off"
                 value={amount}
-                onChange={(e) => setAmount(e.target.value.replace(/[^0-9.,]/g, ''))}
+                onInput={(e) => setAmount(e.currentTarget.value.replace(/[^0-9.,]/g, ''))}
               />
               <CurSelect id="cx-from" label="Moeda de origem" value={from} onChange={setFrom} />
             </div>

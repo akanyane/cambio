@@ -11,5 +11,5 @@ const code = String(Astro.params.code).toUpperCase();
 const c = BY[code];
 ---
 <Layout title={`${c.name} (${code}) · Câmbio`} description={`Cotação, histórico de 1 ano, faixa de 52 semanas e conversões de ${c.name} (${code}).`} og={code.toLowerCase()}>
-  <App client:only="react" initialPage="detail" initialDetail={code} />
+  <App client:only="preact" initialPage="detail" initialDetail={code} />
 </Layout>

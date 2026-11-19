@@ -48,7 +48,7 @@ export function AlertForm({
           inputMode="decimal"
           autoComplete="off"
           value={draft.val}
-          onChange={(e) => setDraft({ ...draft, val: e.target.value.replace(/[^0-9.,]/g, '') })}
+          onInput={(e) => setDraft({ ...draft, val: e.currentTarget.value.replace(/[^0-9.,]/g, '') })}
         />
       </div>
     </>

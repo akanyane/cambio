@@ -4,7 +4,7 @@ An editorial-style currency dashboard: the world's currencies, seen from where y
 
 **Live:** https://cambio.akanyane.dev
 
-Built with **Astro + React (TypeScript)** from the design handoff in `docs/design/`. The interface is in Brazilian Portuguese.
+Built with **Astro + Preact (TypeScript, via `preact/compat`)** from the design handoff in `docs/design/`. The interface is in Brazilian Portuguese.
 
 ## Features
 
@@ -50,7 +50,7 @@ Rates are informational only. Do not use them for trading.
 - `src/lib/rates/`: data layer. One file per source; `index.ts` merges them into a single `MarketData` shape (units per 1 USD).
 - `src/lib/model.ts`: series, ranges, chart scaling and volatility.
 - `src/components/`: Header/Ticker, BaseSelector, Featured, Market (grid, list, matrix), Converter, Detail, AlertForm, Odometer.
-- `src/pages/`: `index.astro` and `moeda/[code].astro` (22 static pages, all hydrating the same React island).
+- `src/pages/`: `index.astro` and `moeda/[code].astro` (22 static pages, all hydrating the same Preact island) and `og/[slug].png.ts` (Open Graph cards rendered at build time).
 - `src/styles/global.css`: CSS ported from the design. No `border-radius` anywhere.
 
 ## Releases and deployment
