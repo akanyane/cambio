@@ -25,7 +25,8 @@ Requires [Bun](https://bun.sh).
 ```bash
 bun install
 bun run dev       # http://localhost:4321
-bun run build     # astro check + static build into dist/
+bun run build     # type-check (TypeScript 7) + static build into dist/
+bun run typecheck # type-check only
 bun test          # unit tests (formatting, pair math, alerts, data sources)
 bun run lint      # Biome (lint + format check)
 bun run lint:fix  # apply Biome fixes
