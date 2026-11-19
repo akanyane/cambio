@@ -3,6 +3,7 @@ import { BY } from '../lib/currencies';
 import { dayMonth, dir, fmt, fmtSigned, lede, pct } from '../lib/format';
 import { pairValue, pathD, scale, series, seriesDates } from '../lib/model';
 import type { MarketData } from '../lib/rates';
+import { chartKeyHandler } from './chartKeys';
 import { Arrow } from './Icons';
 import { OdoValue } from './Odometer';
 import type { Motion } from './types';
@@ -91,7 +92,20 @@ export function Featured({ data, base, code, flash, motion, onOpen }: Props) {
               <i className="tr" aria-hidden="true" />
               <i className="bl" aria-hidden="true" />
               <i className="br" aria-hidden="true" />
-              <div className="chart" onPointerLeave={() => setHov(null)}>
+              <div
+                className="chart"
+                role="slider"
+                aria-roledescription="gráfico"
+                aria-label={`${code} em ${base} nas últimas sete sessões: de ${fmt(fs[0])} em ${labels[0]} a ${fmt(fs[last])} hoje, ${pct(wk)}. Mínima ${fmt(Math.min(...fs))}, máxima ${fmt(Math.max(...fs))}.`}
+                aria-valuemin={0}
+                aria-valuemax={last}
+                aria-valuenow={hi}
+                aria-valuetext={`${labels[hi]}: ${fmt(fs[hi])}`}
+                tabIndex={0}
+                onKeyDown={chartKeyHandler(fs.length, hov, setHov)}
+                onBlur={() => setHov(null)}
+                onPointerLeave={() => setHov(null)}
+              >
                 <svg className="chart-svg" viewBox="0 0 640 260" aria-hidden="true">
                   <path className="gl" d="M0 24H640" />
                   <path className="gl" d="M0 130H640" />

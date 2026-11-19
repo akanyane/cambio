@@ -226,6 +226,9 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
 
   return (
     <div className={`cx ${theme === 'dark' ? 'dark' : ''}`}>
+      <a className="skip" href="#main">
+        Pular para o conteúdo
+      </a>
       <header>
         <Header
           theme={theme}
@@ -235,7 +238,7 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
         {data ? <Ticker items={tickerItems(data, base, pins)} /> : <div className="ticker" />}
       </header>
 
-      <main>
+      <main id="main" tabIndex={-1}>
         {!data && <Loading />}
         {data && page === 'home' && (
           <>

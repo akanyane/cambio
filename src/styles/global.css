@@ -271,7 +271,9 @@ a:hover {
   flex: none;
   animation: tick 70s linear infinite;
 }
-.ticker:hover .track {
+.ticker:hover .track,
+.ticker:focus-within .track,
+.ticker.paused .track {
   animation-play-state: paused;
 }
 @keyframes tick {
@@ -1299,8 +1301,10 @@ a:hover {
   font-size: 12px;
   transition: background-color 0.3s var(--ease);
 }
-.mx td.rh {
+.mx .rh {
+  color: var(--ink);
   text-align: left;
+  transition: background-color 0.3s var(--ease);
   font-family: var(--num);
   font-weight: 720;
   font-stretch: 115%;
@@ -1308,7 +1312,8 @@ a:hover {
   font-size: 18px;
 }
 .mx td.base,
-.mx tr.base td {
+.mx tr.base td,
+.mx tr.base .rh {
   background: var(--accentBg);
 }
 .mx td.diag {
@@ -1320,7 +1325,8 @@ a:hover {
 .mx td.s-dn {
   color: var(--down);
 }
-.mx tbody tr:hover td {
+.mx tbody tr:hover td,
+.mx tbody tr:hover .rh {
   background: var(--panel);
 }
 .mx-legend {
@@ -2521,4 +2527,42 @@ html.dark body {
 }
 .dhit {
   touch-action: pan-y;
+}
+
+/* accessibility additions */
+.skip,
+.tk-pause {
+  position: absolute;
+  z-index: 100;
+  left: 16px;
+  top: 8px;
+  padding: 10px 14px;
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border: 0;
+  transform: translateY(-200%);
+}
+.skip:focus,
+.tk-pause:focus {
+  transform: none;
+}
+.ticker {
+  position: relative;
+}
+.tk-pause {
+  top: 4px;
+  left: auto;
+  right: 16px;
+}
+main:focus {
+  outline: none;
+}
+.chart:focus-visible,
+.dchart:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 6px;
 }

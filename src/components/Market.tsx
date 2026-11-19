@@ -313,11 +313,14 @@ function Matrix({ data, base }: { data: MarketData; base: string }) {
     <>
       <div className="mx-box">
         <table className="mx">
+          <caption className="sr">Câmbio cruzado: valor de 1 unidade da moeda da linha em cada moeda da coluna</caption>
           <thead>
             <tr>
-              <th className="c">1 unidade de ↓ em →</th>
+              <th className="c" scope="col">
+                1 unidade de ↓ em →
+              </th>
               {mx.map((c) => (
-                <th key={c} className={c === base ? 'base' : ''}>
+                <th key={c} className={c === base ? 'base' : ''} scope="col">
                   {c}
                 </th>
               ))}
@@ -326,12 +329,15 @@ function Matrix({ data, base }: { data: MarketData; base: string }) {
           <tbody>
             {mx.map((r) => (
               <tr key={r} className={r === base ? 'base' : ''}>
-                <td className="rh">{r}</td>
+                <th className="rh" scope="row">
+                  {r}
+                </th>
                 {mx.map((c) => {
                   if (c === r)
                     return (
                       <td key={c} className={`diag ${c === base ? 'base' : ''}`}>
-                        —
+                        <span aria-hidden="true">—</span>
+                        <span className="sr">1</span>
                       </td>
                     );
                   const v = pairValue(data, r, c);

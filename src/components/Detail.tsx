@@ -16,6 +16,7 @@ import {
 import type { MarketData } from '../lib/rates';
 import { SOURCE_LABEL } from '../lib/rates/types';
 import { AlertForm } from './AlertForm';
+import { chartKeyHandler } from './chartKeys';
 import { sizeCls } from './Featured';
 import { Back, Bell, Pin } from './Icons';
 import type { AlertFormCtl } from './Market';
@@ -251,7 +252,19 @@ export function Detail({
             <i className="tr" aria-hidden="true" />
             <i className="bl" aria-hidden="true" />
             <i className="br" aria-hidden="true" />
-            <div className="dchart">
+            <div
+              className="dchart"
+              role="slider"
+              aria-roledescription="gráfico"
+              aria-label={`${X} em ${base}, ${RANGE_LABEL[range]}: de ${fmt(ds[0])} em ${longDay(dDates[0])} a ${fmt(ds[n - 1])} hoje, ${pct(rangeChg)}. Mínima ${fmt(Math.min(...ds))}, máxima ${fmt(Math.max(...ds))}.`}
+              aria-valuemin={0}
+              aria-valuemax={n - 1}
+              aria-valuenow={dh}
+              aria-valuetext={`${dh === n - 1 ? 'Hoje' : longDay(dDates[dh])}: ${fmt(ds[dh])}`}
+              tabIndex={0}
+              onKeyDown={chartKeyHandler(n, hov, setHov)}
+              onBlur={() => setHov(null)}
+            >
               <svg className="chart-svg" viewBox="0 0 1200 380" aria-hidden="true">
                 <path className="gl" d="M0 28H1200" />
                 <path className="gl" d="M0 190H1200" />

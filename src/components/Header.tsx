@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { MARKETS } from '../lib/currencies';
 import { clockStr, MONTHS_LONG, p2, WEEKDAYS } from '../lib/format';
 import { useNow } from '../lib/hooks';
@@ -138,8 +139,12 @@ export interface TickerItem {
 
 export function Ticker({ items }: { items: TickerItem[] }) {
   const all = items.concat(items);
+  const [paused, setPaused] = useState(false);
   return (
-    <section className="ticker" aria-label="Cotações em tempo real">
+    <section className={`ticker ${paused ? 'paused' : ''}`} aria-label="Cotações em tempo real">
+      <button type="button" className="tk-pause" aria-pressed={paused} onClick={() => setPaused(!paused)}>
+        {paused ? 'Retomar rolagem das cotações' : 'Pausar rolagem das cotações'}
+      </button>
       <div className="track">
         {all.map((t, i) => (
           <span
