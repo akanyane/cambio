@@ -1,5 +1,5 @@
 // Deterministic generator from the prototype (mulberry32 + FNV), used when the APIs don't respond.
-import { CURRENCIES, type Currency, GRID } from '../currencies';
+import { BY, CURRENCIES, type Currency, GRID } from '../currencies';
 import type { MarketData } from './types';
 import { todayISO } from './util';
 
@@ -67,6 +67,6 @@ export function sampleMarket(sessions = 258): MarketData {
 export function sampleTick(live: Record<string, number>) {
   const pool = GRID.filter((c) => c !== 'USD');
   const code = pool[Math.floor(Math.random() * pool.length)];
-  const mag = code === 'BTC' ? 0.004 : 0.0009;
+  const mag = BY[code].kind === 'crypto' ? 0.004 : 0.0009;
   return { [code]: { value: live[code] * (1 + (Math.random() - 0.5) * 2 * mag) } };
 }

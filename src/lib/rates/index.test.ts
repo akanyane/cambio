@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { market } from '../test-utils';
 import { fetchAwesomeDaily, fetchAwesomeLive } from './awesome';
+import { fetchCryptoDaily, fetchCryptoPrices } from './binance';
 import { applyLive, loadMarket } from './index';
 import { isoMinusDays } from './util';
 
@@ -51,6 +52,18 @@ describe('AwesomeAPI parsing', () => {
     expect(out.ARS).toBeUndefined();
   });
 
+  test('metals are quoted as XXX-USD and converted to units per USD', async () => {
+    let url = '';
+    stubFetch((u) => {
+      url = u;
+      return { XAUUSD: { bid: '4000', varBid: '-100', timestamp: '0' } };
+    });
+    const out = await fetchAwesomeLive(['XAU']);
+    expect(url).toContain('/last/XAU-USD');
+    expect(out.XAU.value).toBe(1 / 4000);
+    expect(out.XAU.prevClose).toBe(1 / 4100);
+  });
+
   test('daily: keeps the latest quote per São Paulo day', async () => {
     const ts = (iso: string) => String(Date.parse(iso) / 1000);
     stubFetch(() => [
@@ -63,6 +76,28 @@ describe('AwesomeAPI parsing', () => {
       { date: '2026-01-09', value: 1410 },
       { date: '2026-01-10', value: 1420 },
     ]);
+  });
+});
+
+describe('Binance', () => {
+  test('prices for every crypto asset come from one request', async () => {
+    let url = '';
+    stubFetch((u) => {
+      url = u;
+      return [
+        { symbol: 'BTCUSDT', price: '90000' },
+        { symbol: 'ETHUSDT', price: '1800' },
+        { symbol: 'SOLUSDT', price: '0' },
+      ];
+    });
+    const out = await fetchCryptoPrices();
+    expect(decodeURIComponent(url)).toContain('symbols=["BTCUSDT","ETHUSDT","SOLUSDT"]');
+    expect(out).toEqual({ BTC: 90000, ETH: 1800 });
+  });
+
+  test('daily klines map to UTC dates and closes', async () => {
+    stubFetch(() => [[Date.UTC(2026, 0, 9), '1', '2', '0.5', '1.5']]);
+    expect(await fetchCryptoDaily('ETH')).toEqual([{ date: '2026-01-09', value: 1.5 }]);
   });
 });
 
@@ -82,7 +117,7 @@ test('loadMarket uses a stale cached history when the network is down', async ()
     const { CODES } = await import('../currencies');
     const dates = Array.from({ length: 40 }, (_, i) => isoMinusDays('2025-02-10', 40 - i));
     const closes = Object.fromEntries(CODES.map((c) => [c, dates.map(() => (c === 'BRL' ? 5 : 1))]));
-    store.set('cambio:history:v1', JSON.stringify({ dates, closes, sources: {}, day: '2025-02-10', at: 0 }));
+    store.set('cambio:history:v2', JSON.stringify({ dates, closes, sources: {}, day: '2025-02-10', at: 0 }));
     stubFetch(() => new Error('offline'));
     const m = await loadMarket();
     expect(m.sample).toBe(false);

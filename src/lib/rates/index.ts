@@ -1,28 +1,28 @@
 /**
  * `rates` layer: merges every source into a single shape.
  *
- *  - Fiat history (17 currencies): Frankfurter / ECB, which defines the session calendar.
- *  - ARS, CLP, COP history:        AwesomeAPI (daily).
- *  - BTC history:                  Binance (daily klines).
- *  - Live fiat (20 currencies):    AwesomeAPI /last, polled periodically.
- *  - Live BTC:                     Binance WebSocket (see binance.ts).
- *  - Fallback:                     Frankfurter /latest and, finally, the sample generator.
+ *  - Fiat history (17 currencies):   Frankfurter / ECB, which defines the session calendar.
+ *  - ARS, CLP, COP, gold, silver:    AwesomeAPI (daily).
+ *  - BTC, ETH, SOL history:          Binance (daily klines).
+ *  - Live fiat and metals:           AwesomeAPI /last, polled periodically.
+ *  - Live crypto:                    Binance WebSocket (see binance.ts).
+ *  - Fallback:                       Frankfurter /latest and, finally, the sample generator.
  */
 import { BY, CODES } from '../currencies';
 import { fetchAwesomeDaily, fetchAwesomeLive } from './awesome';
-import { fetchBtcDaily, fetchBtcPrice } from './binance';
+import { CRYPTO_CODES, fetchCryptoDaily, fetchCryptoPrices } from './binance';
 import { FRANKFURTER_CODES, fetchFrankfurterLatest, fetchFrankfurterSeries } from './frankfurter';
 import { sampleCloses, sampleMarket } from './sample';
 import type { LiveUpdate, MarketData, Observation } from './types';
 import { align, isoMinusDays, todayISO } from './util';
 
-export { subscribeBtc } from './binance';
+export { subscribeCrypto } from './binance';
 export { sampleTick } from './sample';
 export type { LiveUpdate, MarketData } from './types';
 
-const AWESOME_HIST = ['ARS', 'CLP', 'COP'];
-const LIVE_FIAT = CODES.filter((c) => c !== 'USD' && c !== 'BTC');
-const CACHE_KEY = 'cambio:history:v1';
+const AWESOME_HIST = ['ARS', 'CLP', 'COP', 'XAU', 'XAG'];
+const LIVE_AWESOME = CODES.filter((c) => c !== 'USD' && !CRYPTO_CODES.includes(c));
+const CACHE_KEY = 'cambio:history:v2';
 const CACHE_TTL = 6 * 3600 * 1000;
 
 type History = Pick<MarketData, 'dates' | 'closes' | 'sources'>;
@@ -54,11 +54,13 @@ async function loadHistory(today: string): Promise<History | null> {
   if (cached) return cached;
 
   const start = isoMinusDays(today, 380);
-  const [fr, btc, ...aw] = await Promise.allSettled([
+  const [fr, ...rest] = await Promise.allSettled([
     fetchFrankfurterSeries(start),
-    fetchBtcDaily(400),
+    ...CRYPTO_CODES.map((c) => fetchCryptoDaily(c, 400)),
     ...AWESOME_HIST.map((c) => fetchAwesomeDaily(c)),
   ]);
+  const crypto = rest.slice(0, CRYPTO_CODES.length);
+  const aw = rest.slice(CRYPTO_CODES.length);
   // offline or Frankfurter down: an old history beats sample data
   if (fr.status !== 'fulfilled') return readCache(today, true);
 
@@ -76,12 +78,15 @@ async function loadHistory(today: string): Promise<History | null> {
   };
 
   for (const c of FRANKFURTER_CODES) put(c, fr.value.series[c], 'ECB');
-  if (btc.status === 'fulfilled')
-    put(
-      'BTC',
-      btc.value.map((o) => ({ date: o.date, value: 1 / o.value })),
-      'Binance',
-    );
+  CRYPTO_CODES.forEach((c, i) => {
+    const r = crypto[i];
+    if (r.status === 'fulfilled')
+      put(
+        c,
+        r.value.map((o) => ({ date: o.date, value: 1 / o.value })),
+        'Binance',
+      );
+  });
   AWESOME_HIST.forEach((c, i) => {
     const r = aw[i];
     if (r.status === 'fulfilled') put(c, r.value, 'AwesomeAPI');
@@ -94,9 +99,9 @@ async function loadHistory(today: string): Promise<History | null> {
 
 /** Current quotes for every currency the live sources can deliver. */
 export async function fetchLive(): Promise<LiveUpdate> {
-  const [aw, btc] = await Promise.allSettled([fetchAwesomeLive(LIVE_FIAT), fetchBtcPrice()]);
+  const [aw, crypto] = await Promise.allSettled([fetchAwesomeLive(LIVE_AWESOME), fetchCryptoPrices()]);
   const out: LiveUpdate = aw.status === 'fulfilled' ? { ...aw.value } : {};
-  if (btc.status === 'fulfilled' && btc.value > 0) out.BTC = { value: 1 / btc.value };
+  if (crypto.status === 'fulfilled') for (const [c, usd] of Object.entries(crypto.value)) out[c] = { value: 1 / usd };
 
   const missing = FRANKFURTER_CODES.filter((c) => !out[c]);
   if (missing.length) {

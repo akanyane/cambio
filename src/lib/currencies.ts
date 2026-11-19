@@ -7,6 +7,7 @@ export interface Currency {
   tile: string;
   /** Feminine grammatical gender in Portuguese ("da libra", "uma rupia"). */
   fem: boolean;
+  kind: 'fiat' | 'crypto' | 'metal';
   /** Sample generator parameters (offline fallback). */
   sample: { rate: number; vol: number; drift: number };
 }
@@ -35,7 +36,15 @@ const RAW: [string, string, string, string, number, number, number, number][] = 
   ['NZD', 'Dólar neozelandês', 'NZ$', 'NZ$', 1.6982, 0.004, 0, 0],
   ['CLP', 'Peso chileno', 'CLP$', '$', 935.2, 0.0045, 0, 0],
   ['COP', 'Peso colombiano', 'COL$', '$', 4012.0, 0.0048, 0, 0],
+  ['ETH', 'Ethereum', 'Ξ', 'Ξ', 1 / 1786, 0.03, 0, 0],
+  ['SOL', 'Solana', 'SOL', '◎', 1 / 74.5, 0.04, 0, 0],
+  // precious metals are quoted per troy ounce
+  ['XAU', 'Onça de ouro', 'Au', 'Au', 1 / 3684, 0.01, 0, 1],
+  ['XAG', 'Onça de prata', 'Ag', 'Ag', 1 / 44.5, 0.018, 0, 1],
 ];
+
+const CRYPTO = new Set(['BTC', 'ETH', 'SOL']);
+const METALS = new Set(['XAU', 'XAG']);
 
 export const CURRENCIES: Currency[] = RAW.map((r) => ({
   code: r[0],
@@ -43,13 +52,31 @@ export const CURRENCIES: Currency[] = RAW.map((r) => ({
   sym: r[2],
   tile: r[3],
   fem: !!r[7],
+  kind: CRYPTO.has(r[0]) ? 'crypto' : METALS.has(r[0]) ? 'metal' : 'fiat',
   sample: { rate: r[4], vol: r[5], drift: r[6] },
 }));
 
 export const BY: Record<string, Currency> = Object.fromEntries(CURRENCIES.map((c) => [c.code, c]));
 export const CODES = CURRENCIES.map((c) => c.code);
 
-export const GRID = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'CNY', 'ARS', 'MXN', 'BTC', 'BRL'];
+export const GRID = [
+  'USD',
+  'EUR',
+  'GBP',
+  'JPY',
+  'CHF',
+  'CAD',
+  'AUD',
+  'CNY',
+  'ARS',
+  'MXN',
+  'BRL',
+  'BTC',
+  'ETH',
+  'SOL',
+  'XAU',
+  'XAG',
+];
 export const QUICK = ['BRL', 'USD', 'EUR', 'GBP', 'JPY'];
 export const MATRIX = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CNY', 'CAD', 'BRL'];
 export const VIEWS = ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'BRL', 'CNY', 'ARS'];

@@ -76,7 +76,7 @@ function frame(main: Node, footer: string) {
 }
 
 function homeCard() {
-  const codes = CODES.filter((c) => c !== 'BTC').slice(0, 11);
+  const codes = CODES.slice(0, 11);
   return frame(
     h(
       'div',
@@ -94,7 +94,7 @@ function homeCard() {
         ),
       ),
     ),
-    '22 moedas · câmbio cruzado · conversor · alertas',
+    `${CODES.length} moedas, cripto e metais · conversor · alertas`,
   );
 }
 

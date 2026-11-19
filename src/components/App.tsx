@@ -353,7 +353,7 @@ function Colophon({ data }: { data: MarketData | null }) {
         <div>
           <span className="lbl">Atualização</span>
           <p className="num">
-            {sample ? 'Simulada a cada 3 segundos.' : 'Moedas a cada 60 s, bitcoin em tempo real.'}
+            {sample ? 'Simulada a cada 3 segundos.' : 'Moedas e metais a cada 60 s, cripto em tempo real.'}
             {data && ` Última às ${clockStr(new Date(data.asOf))}.`}
           </p>
         </div>

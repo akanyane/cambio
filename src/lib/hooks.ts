@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { applyLive, fetchLive, loadMarket, type MarketData, sampleTick, subscribeBtc } from './rates';
+import { applyLive, fetchLive, loadMarket, type MarketData, sampleTick, subscribeCrypto } from './rates';
 
 const LIVE_POLL_MS = 60_000;
-const BTC_THROTTLE_MS = 2_500;
+const CRYPTO_THROTTLE_MS = 2_500;
 const SAMPLE_TICK_MS = 3_200;
 
 /** State persisted in localStorage (per browser). */
@@ -81,15 +81,15 @@ export function useMarket() {
     return () => window.removeEventListener('online', refresh);
   }, [ready, sample, refresh]);
 
-  // live BTC from Binance
-  const lastBtc = useRef(0);
+  // live crypto from Binance, throttled per asset
+  const lastTick = useRef<Record<string, number>>({});
   useEffect(() => {
     if (!ready || sample) return;
-    return subscribeBtc((usd) => {
+    return subscribeCrypto((code, usd) => {
       const now = Date.now();
-      if (now - lastBtc.current < BTC_THROTTLE_MS || document.hidden) return;
-      lastBtc.current = now;
-      setData((d) => (d ? applyLive(d, { BTC: { value: 1 / usd } }) : d));
+      if (now - (lastTick.current[code] ?? 0) < CRYPTO_THROTTLE_MS || document.hidden) return;
+      lastTick.current[code] = now;
+      setData((d) => (d ? applyLive(d, { [code]: { value: 1 / usd } }) : d));
     });
   }, [ready, sample]);
 

@@ -8,7 +8,7 @@ Built with **Astro + Preact (TypeScript, via `preact/compat`)** from the design 
 
 ## Features
 
-- Pick any of 22 currencies as the base; every value is shown from that point of view
+- Pick any of 26 assets as the base (22 currencies, BTC/ETH/SOL, gold and silver); every value is shown from that point of view
 - Market clock for Tokyo, London, New York and São Paulo, plus a scrolling ticker
 - Featured pair with an odometer-style value and a 7-session chart
 - Market view as grid, list or 8×8 cross-rate matrix
@@ -35,14 +35,14 @@ bun run lint:fix  # apply Biome fixes
 
 All public, keyless and CORS-enabled, fetched directly from the browser.
 
-| Purpose                                                                         | Source                                                                                     |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| Daily history for 17 currencies (defines the session calendar)                  | [Frankfurter](https://frankfurter.dev): European Central Bank reference rates              |
-| ARS, CLP and COP history                                                        | [AwesomeAPI](https://docs.awesomeapi.com.br/api-de-moedas), `/json/daily`                  |
-| BTC history                                                                     | Binance, `data-api.binance.vision` (daily klines)                                          |
-| Live quotes for 20 fiat currencies (every 60 s, paused while the tab is hidden) | AwesomeAPI, `/json/last`                                                                   |
-| Real-time BTC                                                                   | Binance WebSocket (`miniTicker`)                                                           |
-| Fallback                                                                        | Frankfurter `/latest`; if nothing responds, the prototype's deterministic sample generator |
+| Purpose                                                                                 | Source                                                                                     |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| Daily history for 17 currencies (defines the session calendar)                          | [Frankfurter](https://frankfurter.dev): European Central Bank reference rates              |
+| ARS, CLP, COP, gold (XAU) and silver (XAG) history                                      | [AwesomeAPI](https://docs.awesomeapi.com.br/api-de-moedas), `/json/daily`                  |
+| BTC, ETH and SOL history                                                                | Binance, `data-api.binance.vision` (daily klines)                                          |
+| Live quotes for fiat currencies and metals (every 60 s, paused while the tab is hidden) | AwesomeAPI, `/json/last`                                                                   |
+| Real-time crypto                                                                        | Binance WebSocket (combined `miniTicker` stream)                                           |
+| Fallback                                                                                | Frankfurter `/latest`; if nothing responds, the prototype's deterministic sample generator |
 
 Browser APIs used: `Intl` (pt-BR formatting and market time zones), History API (`/moeda/xxx` routes), `localStorage` (theme, base, pins, alerts, converter and a 6-hour history cache), Notifications, Page Visibility, Service Worker + Cache Storage (offline), online/offline events, `prefers-reduced-motion` and `prefers-color-scheme`.
 
@@ -53,7 +53,7 @@ Rates are informational only. Do not use them for trading.
 - `src/lib/rates/`: data layer. One file per source; `index.ts` merges them into a single `MarketData` shape (units per 1 USD).
 - `src/lib/model.ts`: series, ranges, chart scaling and volatility.
 - `src/components/`: Header/Ticker, BaseSelector, Featured, Market (grid, list, matrix), Converter, Detail, AlertForm, Odometer.
-- `src/pages/`: `index.astro` and `moeda/[code].astro` (22 static pages, all hydrating the same Preact island) and `og/[slug].png.ts` (Open Graph cards rendered at build time).
+- `src/pages/`: `index.astro` and `moeda/[code].astro` (26 static pages, all hydrating the same Preact island) and `og/[slug].png.ts` (Open Graph cards rendered at build time).
 - `src/lib/images.ts`: build-time Open Graph cards and app icons (satori + resvg).
 - `public/sw.js`: service worker (network-first pages and rate APIs, cache-first assets and fonts).
 - `src/styles/global.css`: CSS ported from the design. No `border-radius` anywhere.
