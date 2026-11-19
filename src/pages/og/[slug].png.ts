@@ -1,5 +1,5 @@
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { OG_SLUGS, renderOg } from '../../lib/og';
+import { OG_SLUGS, renderOg } from '../../lib/images';
 
 export const getStaticPaths: GetStaticPaths = () => OG_SLUGS.map((slug) => ({ params: { slug } }));
 

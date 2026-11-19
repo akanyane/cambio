@@ -2502,6 +2502,15 @@ html.dark body {
 .live.demo .dot::after {
   border-color: var(--accent);
 }
+.live.off {
+  color: var(--mute);
+}
+.live.off .dot {
+  background: var(--mute);
+}
+.live.off .dot::after {
+  display: none;
+}
 .src {
   display: inline-block;
   margin-left: 8px;

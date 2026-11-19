@@ -6,8 +6,10 @@ import { Moon, Sun } from './Icons';
 interface Props {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
-  live: boolean;
+  status: 'live' | 'sample' | 'offline';
 }
+
+const STATUS_LABEL = { live: 'Ao vivo', sample: 'Exemplo', offline: 'Offline' };
 
 const WD: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 const dur = (h: number) => {
@@ -57,7 +59,7 @@ function marketRows(now: Date) {
   });
 }
 
-export function Header({ theme, onToggleTheme, live }: Props) {
+export function Header({ theme, onToggleTheme, status }: Props) {
   const now = useNow();
   const start = new Date(now.getFullYear(), 0, 0);
   const edition = Math.floor((now.getTime() - start.getTime()) / 864e5);
@@ -72,9 +74,9 @@ export function Header({ theme, onToggleTheme, live }: Props) {
           <span>{longDate}</span>
         </div>
         <div className="top-r">
-          <span className={`live ${live ? '' : 'demo'}`}>
+          <span className={`live ${status === 'live' ? '' : status === 'sample' ? 'demo' : 'off'}`} role="status">
             <span className="dot" aria-hidden="true" />
-            {live ? 'Ao vivo' : 'Exemplo'}
+            {STATUS_LABEL[status]}
           </span>
           <span className="clock num">{clockStr(now)}</span>
           <button

@@ -74,6 +74,13 @@ export function useMarket() {
     };
   }, [ready, sample, refresh]);
 
+  // catch up as soon as the connection comes back
+  useEffect(() => {
+    if (!ready || sample) return;
+    window.addEventListener('online', refresh);
+    return () => window.removeEventListener('online', refresh);
+  }, [ready, sample, refresh]);
+
   // live BTC from Binance
   const lastBtc = useRef(0);
   useEffect(() => {
@@ -104,6 +111,21 @@ export function useNow(intervalMs = 1000) {
     return () => clearInterval(iv);
   }, [intervalMs]);
   return now;
+}
+
+/** navigator.onLine, kept in sync with the online/offline events. */
+export function useOnline() {
+  const [online, setOnline] = useState(() => typeof navigator === 'undefined' || navigator.onLine);
+  useEffect(() => {
+    const on = () => setOnline(navigator.onLine);
+    window.addEventListener('online', on);
+    window.addEventListener('offline', on);
+    return () => {
+      window.removeEventListener('online', on);
+      window.removeEventListener('offline', on);
+    };
+  }, []);
+  return online;
 }
 
 export function usePrefersReducedMotion() {

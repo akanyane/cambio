@@ -14,6 +14,9 @@ const {
 } = Astro.props;
 const url = new URL(Astro.url.pathname, Astro.site);
 const image = new URL(`/og/${og}.png`, Astro.site);
+// production only, so the dev server never serves stale cached assets
+const registerSW =
+  "if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));";
 ---
 <!doctype html>
 <html lang="pt-BR">
@@ -21,8 +24,12 @@ const image = new URL(`/og/${og}.png`, Astro.site);
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#ECEFE8" />
+    <meta name="theme-color" content="#ECEFE8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0D1311" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="Câmbio" />
     <link rel="canonical" href={url} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Câmbio" />
@@ -52,6 +59,7 @@ const image = new URL(`/og/${og}.png`, Astro.site);
         if (t === 'dark' || (!t && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
       } catch (e) {}
     </script>
+    {import.meta.env.PROD && <script is:inline set:html={registerSW} />}
   </head>
   <body>
     <slot />

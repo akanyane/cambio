@@ -4,7 +4,7 @@ import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { BY, CODES, type Currency } from './currencies';
 
-// Build-time only: renders the 1200×630 Open Graph cards served at /og/*.png.
+// Build-time only: renders the Open Graph cards (/og/*.png) and the app icons (/icons/*.png).
 
 const W = 1200;
 const H = 630;
@@ -116,17 +116,51 @@ function currencyCard(c: Currency) {
   );
 }
 
-/** Renders the card for `slug` ('home' or a lowercase currency code) as PNG bytes. */
-export async function renderOg(slug: string): Promise<Uint8Array<ArrayBuffer>> {
-  const c = BY[slug.toUpperCase()];
-  const tree = c ? currencyCard(c) : homeCard();
+async function toPng(tree: Node, width: number, height: number): Promise<Uint8Array<ArrayBuffer>> {
   // satori accepts React-element-shaped plain objects
   const svg = await satori(tree as unknown as Parameters<typeof satori>[0], {
-    width: W,
-    height: H,
+    width,
+    height,
     fonts: await loadFonts(),
   });
-  return new Uint8Array(new Resvg(svg, { fitTo: { mode: 'width', value: W } }).render().asPng());
+  return new Uint8Array(new Resvg(svg, { fitTo: { mode: 'width', value: width } }).render().asPng());
+}
+
+/** Renders the card for `slug` ('home' or a lowercase currency code) as PNG bytes. */
+export function renderOg(slug: string) {
+  const c = BY[slug.toUpperCase()];
+  return toPng(c ? currencyCard(c) : homeCard(), W, H);
 }
 
 export const OG_SLUGS = ['home', ...CODES.map((c) => c.toLowerCase())];
+
+/**
+ * App icon, matching favicon.svg: a paper "C" on ink with the gold corner square.
+ * Maskable icons keep everything inside the 80% circular safe zone.
+ */
+function icon(size: number, maskable: boolean) {
+  const inset = maskable ? size * 0.22 : 0;
+  const box = size - inset * 2;
+  return h(
+    'div',
+    { width: '100%', height: '100%', background: C.ink, alignItems: 'center', justifyContent: 'center' },
+    h(
+      'div',
+      { position: 'relative', width: box, height: box, alignItems: 'center', justifyContent: 'center' },
+      h('div', { position: 'absolute', left: 0, top: 0, width: box * 0.22, height: box * 0.22, background: C.accent }),
+      h('div', { color: C.bg, fontSize: box * 0.62, fontWeight: 900, lineHeight: 1 }, 'C'),
+    ),
+  );
+}
+
+export const ICONS: Record<string, { size: number; maskable: boolean }> = {
+  'icon-192': { size: 192, maskable: false },
+  'icon-512': { size: 512, maskable: false },
+  'maskable-512': { size: 512, maskable: true },
+  'apple-touch-icon': { size: 180, maskable: false },
+};
+
+export function renderIcon(name: string) {
+  const { size, maskable } = ICONS[name];
+  return toPng(icon(size, maskable), size, size);
+}

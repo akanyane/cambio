@@ -27,12 +27,13 @@ const CACHE_TTL = 6 * 3600 * 1000;
 
 type History = Pick<MarketData, 'dates' | 'closes' | 'sources'>;
 
-function readCache(today: string): History | null {
+/** Cached history; `stale` accepts any age (used when the network is unavailable). */
+function readCache(today: string, stale = false): History | null {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const c = JSON.parse(raw) as History & { day: string; at: number };
-    if (c.day !== today || Date.now() - c.at > CACHE_TTL) return null;
+    if (!stale && (c.day !== today || Date.now() - c.at > CACHE_TTL)) return null;
     if (!CODES.every((k) => Array.isArray(c.closes[k]) && c.closes[k].length === c.dates.length)) return null;
     return { dates: c.dates, closes: c.closes, sources: c.sources };
   } catch {
@@ -58,10 +59,11 @@ async function loadHistory(today: string): Promise<History | null> {
     fetchBtcDaily(400),
     ...AWESOME_HIST.map((c) => fetchAwesomeDaily(c)),
   ]);
-  if (fr.status !== 'fulfilled') return null;
+  // offline or Frankfurter down: an old history beats sample data
+  if (fr.status !== 'fulfilled') return readCache(today, true);
 
   const dates = fr.value.dates.filter((d) => d < today);
-  if (dates.length < 30) return null;
+  if (dates.length < 30) return readCache(today, true);
 
   const closes: History['closes'] = { USD: dates.map(() => 1) };
   const sources: History['sources'] = { USD: 'fixed' };

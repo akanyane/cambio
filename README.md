@@ -15,6 +15,8 @@ Built with **Astro + Preact (TypeScript, via `preact/compat`)** from the design 
 - Converter, pinned currencies and price alerts (with browser notifications)
 - Per-currency detail page (`/moeda/xxx`) with 1M / 6M / 1Y history, 52-week range and volatility
 - Light and dark themes, responsive layout, `prefers-reduced-motion` support
+- Installable PWA that keeps working offline with the last quotes it saw
+- Share previews (Open Graph cards) for the home page and every currency
 
 ## Getting started
 
@@ -42,7 +44,7 @@ All public, keyless and CORS-enabled, fetched directly from the browser.
 | Real-time BTC                                                                   | Binance WebSocket (`miniTicker`)                                                           |
 | Fallback                                                                        | Frankfurter `/latest`; if nothing responds, the prototype's deterministic sample generator |
 
-Browser APIs used: `Intl` (pt-BR formatting and market time zones), History API (`/moeda/xxx` routes), `localStorage` (theme, base, pins, alerts, converter and a 6-hour history cache), Notifications, Page Visibility, `prefers-reduced-motion` and `prefers-color-scheme`.
+Browser APIs used: `Intl` (pt-BR formatting and market time zones), History API (`/moeda/xxx` routes), `localStorage` (theme, base, pins, alerts, converter and a 6-hour history cache), Notifications, Page Visibility, Service Worker + Cache Storage (offline), online/offline events, `prefers-reduced-motion` and `prefers-color-scheme`.
 
 Rates are informational only. Do not use them for trading.
 
@@ -52,6 +54,8 @@ Rates are informational only. Do not use them for trading.
 - `src/lib/model.ts`: series, ranges, chart scaling and volatility.
 - `src/components/`: Header/Ticker, BaseSelector, Featured, Market (grid, list, matrix), Converter, Detail, AlertForm, Odometer.
 - `src/pages/`: `index.astro` and `moeda/[code].astro` (22 static pages, all hydrating the same Preact island) and `og/[slug].png.ts` (Open Graph cards rendered at build time).
+- `src/lib/images.ts`: build-time Open Graph cards and app icons (satori + resvg).
+- `public/sw.js`: service worker (network-first pages and rate APIs, cache-first assets and fonts).
 - `src/styles/global.css`: CSS ported from the design. No `border-radius` anywhere.
 
 ## Releases and deployment

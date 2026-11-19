@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { checkAlerts } from '../lib/alerts';
 import { BY, CODES } from '../lib/currencies';
 import { clockStr, dir, fmt, parseAmt, pct } from '../lib/format';
-import { useMarket, usePersistent, usePrefersReducedMotion } from '../lib/hooks';
+import { useMarket, useOnline, usePersistent, usePrefersReducedMotion } from '../lib/hooks';
 import { pairValue, series } from '../lib/model';
 import type { MarketData } from '../lib/rates';
 import { BaseSelector } from './BaseSelector';
@@ -34,6 +34,7 @@ const notBase = (c: string, base: string) => (c === base ? (base === 'USD' ? 'EU
 
 export default function App({ initialPage = 'home', initialDetail = 'USD' }: Props) {
   const data = useMarket();
+  const online = useOnline();
   const reduced = usePrefersReducedMotion();
 
   const [theme, setTheme] = usePersistent<Theme>('theme', () =>
@@ -226,7 +227,11 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
   return (
     <div className={`cx ${theme === 'dark' ? 'dark' : ''}`}>
       <header>
-        <Header theme={theme} onToggleTheme={flipTheme} live={!!data && !data.sample} />
+        <Header
+          theme={theme}
+          onToggleTheme={flipTheme}
+          status={!online ? 'offline' : data && !data.sample ? 'live' : 'sample'}
+        />
         {data ? <Ticker items={tickerItems(data, base, pins)} /> : <div className="ticker" />}
       </header>
 

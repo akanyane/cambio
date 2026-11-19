@@ -2,6 +2,7 @@ import { afterEach, describe, expect, mock, test } from 'bun:test';
 import { market } from '../test-utils';
 import { fetchAwesomeDaily, fetchAwesomeLive } from './awesome';
 import { applyLive, loadMarket } from './index';
+import { isoMinusDays } from './util';
 
 const realFetch = globalThis.fetch;
 afterEach(() => {
@@ -70,4 +71,23 @@ test('loadMarket falls back to sample data when every API fails', async () => {
   const m = await loadMarket();
   expect(m.sample).toBe(true);
   expect(m.live.USD).toBe(1);
+});
+
+test('loadMarket uses a stale cached history when the network is down', async () => {
+  const store = new Map<string, string>();
+  const ls = globalThis as unknown as { localStorage?: Pick<Storage, 'getItem' | 'setItem'> };
+  const prev = ls.localStorage;
+  ls.localStorage = { getItem: (k) => store.get(k) ?? null, setItem: (k, v) => void store.set(k, v) };
+  try {
+    const { CODES } = await import('../currencies');
+    const dates = Array.from({ length: 40 }, (_, i) => isoMinusDays('2025-02-10', 40 - i));
+    const closes = Object.fromEntries(CODES.map((c) => [c, dates.map(() => (c === 'BRL' ? 5 : 1))]));
+    store.set('cambio:history:v1', JSON.stringify({ dates, closes, sources: {}, day: '2025-02-10', at: 0 }));
+    stubFetch(() => new Error('offline'));
+    const m = await loadMarket();
+    expect(m.sample).toBe(false);
+    expect(m.live.BRL).toBe(5);
+  } finally {
+    ls.localStorage = prev;
+  }
 });
