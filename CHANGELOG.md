@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/akanyane/cambio/compare/cambio-v0.2.0...cambio-v0.2.1) (2026-11-19)
+
+
+### Bug Fixes
+
+* restore !important rules stripped by Biome autofix ([9c3eccc](https://github.com/akanyane/cambio/commit/9c3eccc93baf68d6ffd9700e84d738203d7b947c))
+
 ## [0.2.0](https://github.com/akanyane/cambio/compare/cambio-v0.1.0...cambio-v0.2.0) (2026-11-19)
 
 
