@@ -4,3 +4,5 @@ dist/
 .env
 *:Zone.Identifier
 *.zip
+.vercel
+.env*
