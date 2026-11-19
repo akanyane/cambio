@@ -24,6 +24,7 @@ Requires [Bun](https://bun.sh).
 bun install
 bun run dev       # http://localhost:4321
 bun run build     # astro check + static build into dist/
+bun test          # unit tests (formatting, pair math, alerts, data sources)
 bun run lint      # Biome (lint + format check)
 bun run lint:fix  # apply Biome fixes
 ```
@@ -56,5 +57,5 @@ Rates are informational only. Do not use them for trading.
 ## Releases and deployment
 
 - Commits follow [Conventional Commits](https://www.conventionalcommits.org); [release-please](https://github.com/googleapis/release-please) opens release PRs and publishes GitHub releases.
-- CI runs Biome and the build on every push and pull request.
+- CI runs Biome, the unit tests and the build on every push and pull request.
 - Every push to `main` deploys to Vercel.
