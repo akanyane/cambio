@@ -1,39 +1,49 @@
 ---
 import '../styles/global.css';
+import { DICT, detailPath, homePath, intlTag, type Locale } from '../lib/i18n';
 
 interface Props {
+  locale: Locale;
   title: string;
   description?: string;
-  /** Open Graph image slug under /og ('home' or a lowercase currency code). */
-  og?: string;
+  /** Currency shown on this page (detail pages); used for alternate links and the share image. */
+  code?: string;
 }
-const {
-  title,
-  og = 'home',
-  description = 'As moedas do mundo, vistas de onde você está. Cotações ao vivo, câmbio cruzado, conversor e alertas de preço.',
-} = Astro.props;
-const url = new URL(Astro.url.pathname, Astro.site);
-const image = new URL(`/og/${og}.png`, Astro.site);
+const { locale, title, code, description = DICT[locale].description } = Astro.props;
+
+const pathIn = (l: Locale) => (code ? detailPath(code, l) : homePath(l));
+const url = new URL(pathIn(locale), Astro.site);
+const alternates = (['pt', 'en'] as const).map((l) => ({ l, href: new URL(pathIn(l), Astro.site) }));
+const ogSlug = code ? code.toLowerCase() : 'home';
+const image = new URL(locale === 'pt' ? `/og/${ogSlug}.png` : `/og/en/${ogSlug}.png`, Astro.site);
+const manifest = locale === 'pt' ? '/manifest.webmanifest' : '/en/manifest.webmanifest';
+
 // production only, so the dev server never serves stale cached assets
 const registerSW =
   "if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('/sw.js').catch(() => {}));";
+// Portuguese home only: send browsers that don't prefer Portuguese to /en/, unless a language was chosen
+const autoLang =
+  "try { var l = JSON.parse(localStorage.getItem('cambio:lang')); if (!l && !(navigator.languages || [navigator.language]).some(function (x) { return /^pt/i.test(x); })) location.replace('/en/'); } catch (e) {}";
 ---
 <!doctype html>
-<html lang="pt-BR">
+<html lang={intlTag(locale)}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {locale === 'pt' && !code && <script is:inline set:html={autoLang} />}
     <meta name="description" content={description} />
     <meta name="theme-color" content="#ECEFE8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0D1311" media="(prefers-color-scheme: dark)" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="manifest" href={manifest} />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
     <meta name="apple-mobile-web-app-title" content="Câmbio" />
     <link rel="canonical" href={url} />
+    {alternates.map((a) => <link rel="alternate" hreflang={intlTag(a.l)} href={a.href} />)}
+    <link rel="alternate" hreflang="x-default" href={alternates[0].href} />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Câmbio" />
-    <meta property="og:locale" content="pt_BR" />
+    <meta property="og:locale" content={intlTag(locale).replace('-', '_')} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={url} />

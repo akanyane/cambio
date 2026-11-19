@@ -1,6 +1,7 @@
 import type { Alert } from '../components/types';
 import { BY } from './currencies';
 import { fmt, nf } from './format';
+import { t } from './i18n';
 import type { MarketData } from './rates';
 
 /** Status line for the alert on `code` in the current base (or null). */
@@ -8,10 +9,11 @@ export function alertInfo(data: MarketData, alerts: Record<string, Alert>, code:
   const a = alerts[code];
   if (!a || a.base !== base) return null;
   const v = data.live[a.base] / data.live[code];
-  const word = a.dir === 'above' ? 'acima de' : 'abaixo de';
-  if (a.fired) return { cls: 'fired', text: `Alerta disparado · ${word} ${BY[a.base].sym} ${fmt(a.target)}` };
+  const T = t();
+  const word = T.alertWord[a.dir];
+  if (a.fired) return { cls: 'fired', text: T.alertFired(word, `${BY[a.base].sym} ${fmt(a.target)}`) };
   const dist = Math.abs(a.target / v - 1) * 100;
-  return { cls: '', text: `Alerta ${word} ${fmt(a.target)} · faltam ${nf(2).format(dist)}%` };
+  return { cls: '', text: T.alertPending(word, fmt(a.target), nf(2).format(dist)) };
 }
 
 /** Checks alerts against current quotes; returns the ones that fired. */
@@ -27,7 +29,7 @@ export function checkAlerts(data: MarketData, alerts: Record<string, Alert>) {
       const sym = BY[a.base].sym;
       fired.push({
         code,
-        text: `${code}/${a.base}${a.dir === 'above' ? ' passou de ' : ' caiu abaixo de '}${sym} ${fmt(a.target)}. Agora vale ${sym} ${fmt(v)}.`,
+        text: t().alertCrossed(`${code}/${a.base}`, a.dir, `${sym} ${fmt(a.target)}`, `${sym} ${fmt(v)}`),
       });
     }
   }

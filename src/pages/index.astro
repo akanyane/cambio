@@ -1,7 +1,8 @@
 ---
 import App from '../components/App';
 import Layout from '../layouts/Layout.astro';
+import { DICT } from '../lib/i18n';
 ---
-<Layout title="Câmbio — as moedas do mundo, vistas de onde você está">
-  <App client:only="preact" initialPage="home" />
+<Layout locale="pt" title={DICT.pt.titleHome}>
+  <App client:only="preact" locale="pt" initialPage="home" />
 </Layout>

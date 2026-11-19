@@ -1,20 +1,10 @@
 import { useEffect, useState } from 'react';
 import { alertInfo } from '../lib/alerts';
 import { BY, VIEWS } from '../lib/currencies';
-import { dayMonth, dir, fmt, fmtSigned, lede, longDay, money, monthYear, nf, pct } from '../lib/format';
-import {
-  pairValue,
-  pathD,
-  RANGE_LABEL,
-  type Range,
-  rangeCount,
-  scale,
-  series,
-  seriesDates,
-  volatility,
-} from '../lib/model';
+import { dayMonth, dir, fmt, fmtSigned, longDay, money, monthYear, nf, pct } from '../lib/format';
+import { cname, lede, t } from '../lib/i18n';
+import { pairValue, pathD, type Range, rangeCount, scale, series, seriesDates, volatility } from '../lib/model';
 import type { MarketData } from '../lib/rates';
-import { SOURCE_LABEL } from '../lib/rates/types';
 import { AlertForm } from './AlertForm';
 import { chartKeyHandler } from './chartKeys';
 import { sizeCls } from './Featured';
@@ -58,6 +48,7 @@ export function Detail({
   onRedraw,
 }: Props) {
   const [range, setRange] = useState<Range>('6M');
+  const T = t();
   const [hov, setHov] = useState<number | null>(null);
   useEffect(() => setHov(null), []);
 
@@ -87,7 +78,7 @@ export function Detail({
   const axis = [];
   for (let k = 0; k < 6; k++) {
     const i = Math.round((k * (n - 1)) / 5);
-    axis.push({ d: dDates[i], label: k === 5 ? 'Hoje' : range === '1A' ? monthYear(dDates[i]) : dayMonth(dDates[i]) });
+    axis.push({ d: dDates[i], label: k === 5 ? T.today : range === '1A' ? monthYear(dDates[i]) : dayMonth(dDates[i]) });
   }
 
   const move = (ev: React.PointerEvent<HTMLDivElement>) => {
@@ -100,20 +91,20 @@ export function Detail({
   const left = `${((dp[dh][0] / 1200) * 100).toFixed(3)}%`;
 
   return (
-    <section className="dt" aria-label="Detalhe da moeda">
+    <section className="dt" aria-label={T.detailLabel}>
       <div className="wrap">
-        <nav className="dt-nav lbl" aria-label="Navegação">
+        <nav className="dt-nav lbl" aria-label={T.navLabel}>
           <button type="button" className="back" onClick={onBack}>
             <Back />
-            Painel
+            {T.dashboard}
           </button>
           <span className="crumb">
-            Painel / Moedas / <b>{X}</b>
+            {T.crumb} <b>{X}</b>
           </span>
           <div className="dt-act">
             <button type="button" className={`btn ${pinned ? 'on' : ''}`} onClick={onTogglePin} aria-pressed={pinned}>
               <Pin />
-              {pinned ? 'Fixada' : 'Fixar'}
+              {pinned ? T.pinned : T.pin}
             </button>
             <button
               type="button"
@@ -122,7 +113,7 @@ export function Detail({
               aria-expanded={alertCtl.open === X}
             >
               <Bell />
-              {hasAlert ? 'Editar alerta' : 'Criar alerta'}
+              {hasAlert ? T.editAlert : T.createAlert}
             </button>
           </div>
         </nav>
@@ -151,10 +142,12 @@ export function Detail({
               </span>
               <span className="sh-r">{XC.tile}</span>
             </div>
-            <h2 className="dt-title">{XC.name}</h2>
+            <h2 className="dt-title">{cname(XC)}</h2>
             <p className="dt-sub">
-              {lede(XC)} vale hoje
-              <span className="src">Fonte: {SOURCE_LABEL[data.sources[X === 'USD' ? base : X]]}</span>
+              {T.worthToday(lede(XC))}
+              <span className="src">
+                {T.source} {T.sources[data.sources[X === 'USD' ? base : X]]}
+              </span>
             </p>
             <div className={`big ${sizeCls(dValStr)}`}>
               <span className="big-sym">{B.sym}</span>
@@ -162,7 +155,9 @@ export function Detail({
             </div>
             <div className="delta" style={{ marginTop: 22 }}>
               <span className={`delta-p ${dir(day)}`}>{pct(day)}</span>
-              <span className="delta-s num">no dia · {fmtSigned(d7[7] - d7[6])}</span>
+              <span className="delta-s num">
+                {T.onDay} · {fmtSigned(d7[7] - d7[6])}
+              </span>
             </div>
             {al && (
               <span className={`alert-line ${al.cls}`} style={{ marginTop: 18 }}>
@@ -173,7 +168,7 @@ export function Detail({
           </div>
           <div className="dt-side">
             <div>
-              <span className="lbl">Faixa de 52 semanas</span>
+              <span className="lbl">{T.range52}</span>
               <div className="r52">
                 <span
                   className="r52-m"
@@ -190,29 +185,29 @@ export function Detail({
             </div>
             <dl className="facts num">
               <div>
-                <dt>Abertura do período</dt>
+                <dt>{T.periodOpen}</dt>
                 <dd>{fmt(ds[0])}</dd>
               </div>
               <div>
-                <dt>Inverso</dt>
+                <dt>{T.inverse}</dt>
                 <dd>
                   {fmt(1 / dv)} {X}
                 </dd>
               </div>
               <div>
-                <dt>Máx. do período</dt>
+                <dt>{T.periodHigh}</dt>
                 <dd>{fmt(Math.max(...ds))}</dd>
               </div>
               <div>
-                <dt>Mín. do período</dt>
+                <dt>{T.periodLow}</dt>
                 <dd>{fmt(Math.min(...ds))}</dd>
               </div>
               <div>
-                <dt>Volatilidade anual</dt>
+                <dt>{T.annualVol}</dt>
                 <dd>{nf(1).format(volatility(year) * 100)}%</dd>
               </div>
               <div>
-                <dt>Variação 7d</dt>
+                <dt>{T.change7d}</dt>
                 <dd className={dir(wk)}>{pct(wk)}</dd>
               </div>
             </dl>
@@ -222,13 +217,15 @@ export function Detail({
         <div className="dchart-wrap">
           <div className="dchart-head">
             <div>
-              <span className="lbl">Histórico · {RANGE_LABEL[range]}</span>
+              <span className="lbl">
+                {T.history} · {T.rangeLabel[range]}
+              </span>
               <div className="delta" style={{ marginTop: 10 }}>
                 <span className={`delta-p ${dir(rangeChg)}`}>{pct(rangeChg)}</span>
-                <span className="delta-s">no período</span>
+                <span className="delta-s">{T.inPeriod}</span>
               </div>
             </div>
-            <div className="seg" role="group" aria-label="Período do gráfico">
+            <div className="seg" role="group" aria-label={T.periodLabel}>
               {RANGES.map((r) => (
                 <button
                   key={r}
@@ -242,7 +239,7 @@ export function Detail({
                     }
                   }}
                 >
-                  {r}
+                  {T.rangeBtn[r]}
                 </button>
               ))}
             </div>
@@ -255,12 +252,21 @@ export function Detail({
             <div
               className="dchart"
               role="slider"
-              aria-roledescription="gráfico"
-              aria-label={`${X} em ${base}, ${RANGE_LABEL[range]}: de ${fmt(ds[0])} em ${longDay(dDates[0])} a ${fmt(ds[n - 1])} hoje, ${pct(rangeChg)}. Mínima ${fmt(Math.min(...ds))}, máxima ${fmt(Math.max(...ds))}.`}
+              aria-roledescription={T.chartRole}
+              aria-label={T.chartSummary(
+                T.pairIn(X, base),
+                T.rangeLabel[range],
+                fmt(ds[0]),
+                longDay(dDates[0]),
+                fmt(ds[n - 1]),
+                pct(rangeChg),
+                fmt(Math.min(...ds)),
+                fmt(Math.max(...ds)),
+              )}
               aria-valuemin={0}
               aria-valuemax={n - 1}
               aria-valuenow={dh}
-              aria-valuetext={`${dh === n - 1 ? 'Hoje' : longDay(dDates[dh])}: ${fmt(ds[dh])}`}
+              aria-valuetext={`${dh === n - 1 ? T.today : longDay(dDates[dh])}: ${fmt(ds[dh])}`}
               tabIndex={0}
               onKeyDown={chartKeyHandler(n, hov, setHov)}
               onBlur={() => setHov(null)}
@@ -289,7 +295,7 @@ export function Detail({
                     className={`tip ${dh > n * 0.66 ? 'r' : ''}`}
                     style={{ left, top: `${((dp[dh][1] / 380) * 100).toFixed(3)}%` }}
                   >
-                    <span>{dh === n - 1 ? 'Hoje' : longDay(dDates[dh])}</span>
+                    <span>{dh === n - 1 ? T.today : longDay(dDates[dh])}</span>
                     <strong className="num">{fmt(ds[dh])}</strong>
                   </span>
                 </>
@@ -314,7 +320,7 @@ export function Detail({
           <div>
             <div className="sh">
               <span className="sh-n">A</span>
-              <span>Conversões rápidas</span>
+              <span>{T.quickConversions}</span>
               <span className="sh-r">
                 {X} ⇄ {base}
               </span>
@@ -353,8 +359,8 @@ export function Detail({
           <div>
             <div className="sh">
               <span className="sh-n">B</span>
-              <span>{X} visto de outras moedas</span>
-              <span className="sh-r">Toque para trocar a base</span>
+              <span>{T.seenFromOthers(X)}</span>
+              <span className="sh-r">{T.tapToSwitch}</span>
             </div>
             <div className="views">
               {VIEWS.filter((c) => c !== X).map((c) => {
@@ -369,7 +375,7 @@ export function Detail({
                     aria-pressed={c === base}
                   >
                     <span className="view-code">{c}</span>
-                    <span className="view-name">{BY[c].name}</span>
+                    <span className="view-name">{cname(BY[c])}</span>
                     <span className="view-val">
                       {BY[c].sym} {fmt(pairValue(data, X, c))}
                     </span>

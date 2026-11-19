@@ -3,6 +3,7 @@ import { checkAlerts } from '../lib/alerts';
 import { BY, CODES } from '../lib/currencies';
 import { clockStr, dir, fmt, parseAmt, pct } from '../lib/format';
 import { useMarket, useOnline, usePersistent, usePrefersReducedMotion } from '../lib/hooks';
+import { detailPath, homePath, type Locale, parsePath, setLocale, t } from '../lib/i18n';
 import { pairValue, series } from '../lib/model';
 import type { MarketData } from '../lib/rates';
 import { BaseSelector } from './BaseSelector';
@@ -18,21 +19,20 @@ type Page = 'home' | 'detail';
 type Theme = 'light' | 'dark';
 
 interface Props {
+  locale?: Locale;
   initialPage?: Page;
   initialDetail?: string;
 }
 
-const pathFor = (page: Page, code: string) => (page === 'detail' ? `/moeda/${code.toLowerCase()}` : '/');
-const parsePath = (p: string): { page: Page; code?: string } => {
-  const m = /\/moeda\/([a-z]{3})\/?$/i.exec(p);
-  const code = m?.[1].toUpperCase();
-  return code && BY[code] ? { page: 'detail', code } : { page: 'home' };
-};
+const pathFor = (page: Page, code: string, l?: Locale) => (page === 'detail' ? detailPath(code, l) : homePath(l));
 const valid = (c: string, fb: string) => (BY[c] ? c : fb);
 /** The viewed currency can't be the base itself. */
 const notBase = (c: string, base: string) => (c === base ? (base === 'USD' ? 'EUR' : 'USD') : c);
 
-export default function App({ initialPage = 'home', initialDetail = 'USD' }: Props) {
+export default function App({ locale = 'pt', initialPage = 'home', initialDetail = 'USD' }: Props) {
+  // one locale per page load; set before any child renders
+  setLocale(locale);
+  const T = t();
   const data = useMarket();
   const online = useOnline();
   const reduced = usePrefersReducedMotion();
@@ -47,8 +47,15 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
   const [pins, setPins] = usePersistent<string[]>('pins', ['USD', 'EUR']);
   const [alerts, setAlerts] = usePersistent<Record<string, Alert>>('alerts', {});
   const [open, setOpen] = useState(false);
-  const [page, setPage] = useState<Page>(initialPage);
-  const [detailRaw, setDetail] = useState(valid(initialDetail, 'USD'));
+  // the URL wins over the props: offline, the service worker may serve the home shell for any route
+  const [start] = useState(() => {
+    const r = parsePath(location.pathname);
+    return r.page === 'detail' && r.code && BY[r.code]
+      ? { page: 'detail' as Page, code: r.code }
+      : { page: initialPage, code: initialDetail };
+  });
+  const [page, setPage] = useState<Page>(start.page);
+  const [detailRaw, setDetail] = useState(valid(start.code, 'USD'));
   const [alertOpen, setAlertOpen] = useState<string | null>(null);
   const [draft, setDraft] = useState<Draft>({ dir: 'above', val: '' });
   const [toast, setToast] = useState<string | null>(null);
@@ -121,7 +128,8 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
   useEffect(() => {
     const onPop = () => {
       const r = parsePath(location.pathname);
-      go(r.page, r.code, false);
+      if (r.page === 'detail' && r.code && BY[r.code]) go('detail', r.code, false);
+      else go('home', undefined, false);
     };
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
@@ -167,14 +175,18 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
     if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
       fired.forEach((f) => {
         try {
-          new Notification('Alerta de preço · Câmbio', { body: f.text, icon: '/favicon.svg', tag: `alert-${f.code}` });
+          new Notification(`${T.priceAlert} · Câmbio`, {
+            body: f.text,
+            icon: '/icons/icon-192.png',
+            tag: `alert-${f.code}`,
+          });
         } catch {
           /* not supported */
         }
       });
     }
     if ('vibrate' in navigator) navigator.vibrate?.([60, 40, 60]);
-  }, [data, alerts, setAlerts]);
+  }, [data, alerts, setAlerts, T]);
 
   useEffect(() => {
     if (!toast) return;
@@ -221,19 +233,20 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
     document.title =
       page === 'detail'
         ? `${detail}/${base} ${BY[base].sym} ${fmt(pairValue(data, detail, base))} · Câmbio`
-        : 'Câmbio — as moedas do mundo, vistas de onde você está';
-  }, [data, page, detail, base]);
+        : T.titleHome;
+  }, [data, page, detail, base, T]);
 
   return (
     <div className={`cx ${theme === 'dark' ? 'dark' : ''}`}>
       <a className="skip" href="#main">
-        Pular para o conteúdo
+        {T.skip}
       </a>
       <header>
         <Header
           theme={theme}
           onToggleTheme={flipTheme}
           status={!online ? 'offline' : data && !data.sample ? 'live' : 'sample'}
+          altHref={pathFor(page, detail, locale === 'pt' ? 'en' : 'pt')}
         />
         {data ? <Ticker items={tickerItems(data, base, pins)} /> : <div className="ticker" />}
       </header>
@@ -295,10 +308,10 @@ export default function App({ initialPage = 'home', initialDetail = 'USD' }: Pro
         <div className="toast" role="status">
           <span className="toast-mark" aria-hidden="true" />
           <div className="toast-body">
-            <span className="lbl">Alerta de preço</span>
+            <span className="lbl">{T.priceAlert}</span>
             <p>{toast}</p>
           </div>
-          <button type="button" className="toast-x" onClick={() => setToast(null)} aria-label="Fechar aviso">
+          <button type="button" className="toast-x" onClick={() => setToast(null)} aria-label={T.closeToast}>
             <Close />
           </button>
         </div>
@@ -317,13 +330,14 @@ function tickerItems(data: MarketData, base: string, pins: string[]) {
 }
 
 function Loading() {
+  const T = t();
   return (
     <section className="loading" aria-live="polite">
       <div className="wrap">
         <div className="sh">
           <span className="sh-n">··</span>
-          <span>Carregando cotações</span>
-          <span className="sh-r">BCE · AwesomeAPI · Binance</span>
+          <span>{T.loading}</span>
+          <span className="sh-r">{T.sourcesShort}</span>
         </div>
         <div className="bar" aria-hidden="true" />
       </div>
@@ -334,27 +348,26 @@ function Loading() {
 function Colophon({ data }: { data: MarketData | null }) {
   const sample = data?.sample;
   const anySample = data && Object.values(data.sources).includes('sample');
+  const T = t();
   return (
     <footer className="colo">
       <div className="wrap colo-in">
         <div>
           <div className="colo-word">Câmbio</div>
           <p>
-            {sample
-              ? 'As APIs de câmbio não responderam: exibindo cotações ilustrativas geradas localmente.'
-              : 'Cotações de referência do BCE (Frankfurter), AwesomeAPI e Binance. Informativo; não use para operações.'}
-            {!sample && anySample && ' Algumas séries usam dados de exemplo.'}
+            {sample ? T.sampleNote : T.sourcesNote}
+            {!sample && anySample && T.someSample}
           </p>
         </div>
         <div>
-          <span className="lbl">Tipografia</span>
-          <p>Archivo em toda a interface, com pesos e larguras variáveis.</p>
+          <span className="lbl">{T.typographyLbl}</span>
+          <p>{T.typography}</p>
         </div>
         <div>
-          <span className="lbl">Atualização</span>
+          <span className="lbl">{T.updatesLbl}</span>
           <p className="num">
-            {sample ? 'Simulada a cada 3 segundos.' : 'Moedas e metais a cada 60 s, cripto em tempo real.'}
-            {data && ` Última às ${clockStr(new Date(data.asOf))}.`}
+            {sample ? T.updatesSample : T.updatesLive}
+            {data && T.lastAt(clockStr(new Date(data.asOf)))}
           </p>
         </div>
       </div>

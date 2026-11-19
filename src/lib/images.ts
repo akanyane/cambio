@@ -3,8 +3,24 @@ import { createRequire } from 'node:module';
 import { Resvg } from '@resvg/resvg-js';
 import satori from 'satori';
 import { BY, CODES, type Currency } from './currencies';
+import { cname, detailPath, type Locale } from './i18n';
 
 // Build-time only: renders the Open Graph cards (/og/*.png) and the app icons (/icons/*.png).
+
+const OG_TEXT = {
+  pt: {
+    live: 'COTAÇÕES AO VIVO',
+    headline: 'As moedas do mundo, vistas de onde você está.',
+    homeFooter: (n: number) => `${n} moedas, cripto e metais · conversor · alertas`,
+    currencySub: 'Histórico de 1 ano, faixa de 52 semanas e conversões',
+  },
+  en: {
+    live: 'LIVE RATES',
+    headline: 'The world’s currencies, seen from where you stand.',
+    homeFooter: (n: number) => `${n} currencies, crypto and metals · converter · alerts`,
+    currencySub: '1-year history, 52-week range and conversions',
+  },
+};
 
 const W = 1200;
 const H = 630;
@@ -33,7 +49,7 @@ function loadFonts() {
   return fonts;
 }
 
-function frame(main: Node, footer: string) {
+function frame(main: Node, footer: string, l: Locale) {
   return h(
     'div',
     {
@@ -57,7 +73,7 @@ function frame(main: Node, footer: string) {
         h('div', { width: 26, height: 26, background: C.accent }),
         h('div', { fontSize: 30, fontWeight: 900, letterSpacing: 6 }, 'CÂMBIO'),
       ),
-      h('div', { fontSize: 22, fontWeight: 500, color: C.mute, letterSpacing: 2 }, 'COTAÇÕES AO VIVO'),
+      h('div', { fontSize: 22, fontWeight: 500, color: C.mute, letterSpacing: 2 }, OG_TEXT[l].live),
     ),
     main,
     h(
@@ -75,7 +91,7 @@ function frame(main: Node, footer: string) {
   );
 }
 
-function homeCard() {
+function homeCard(l: Locale) {
   const codes = CODES.slice(0, 11);
   return frame(
     h(
@@ -84,7 +100,7 @@ function homeCard() {
       h(
         'div',
         { fontSize: 78, fontWeight: 900, lineHeight: 1, letterSpacing: -2, maxWidth: 1000 },
-        'As moedas do mundo, vistas de onde você está.',
+        OG_TEXT[l].headline,
       ),
       h(
         'div',
@@ -94,11 +110,12 @@ function homeCard() {
         ),
       ),
     ),
-    `${CODES.length} moedas, cripto e metais · conversor · alertas`,
+    OG_TEXT[l].homeFooter(CODES.length),
+    l,
   );
 }
 
-function currencyCard(c: Currency) {
+function currencyCard(c: Currency, l: Locale) {
   return frame(
     h(
       'div',
@@ -108,11 +125,12 @@ function currencyCard(c: Currency) {
         'div',
         { flexDirection: 'column', gap: 10, paddingBottom: 6, flex: 1, minWidth: 0 },
         h('div', { width: 64, height: 8, background: C.accent }),
-        h('div', { fontSize: 52, fontWeight: 800, lineHeight: 1.05 }, c.name),
-        h('div', { fontSize: 26, color: C.ink2 }, 'Histórico de 1 ano, faixa de 52 semanas e conversões'),
+        h('div', { fontSize: 52, fontWeight: 800, lineHeight: 1.05 }, cname(c, l)),
+        h('div', { fontSize: 26, color: C.ink2 }, OG_TEXT[l].currencySub),
       ),
     ),
-    `/moeda/${c.code.toLowerCase()}`,
+    detailPath(c.code, l),
+    l,
   );
 }
 
@@ -127,9 +145,9 @@ async function toPng(tree: Node, width: number, height: number): Promise<Uint8Ar
 }
 
 /** Renders the card for `slug` ('home' or a lowercase currency code) as PNG bytes. */
-export function renderOg(slug: string) {
+export function renderOg(slug: string, l: Locale = 'pt') {
   const c = BY[slug.toUpperCase()];
-  return toPng(c ? currencyCard(c) : homeCard(), W, H);
+  return toPng(c ? currencyCard(c, l) : homeCard(l), W, H);
 }
 
 export const OG_SLUGS = ['home', ...CODES.map((c) => c.toLowerCase())];

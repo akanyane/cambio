@@ -2,7 +2,6 @@ import type { MarketData } from './rates';
 import { todayISO } from './rates/util';
 
 export type Range = '1M' | '6M' | '1A';
-export const RANGE_LABEL: Record<Range, string> = { '1M': '1 mês', '6M': '6 meses', '1A': '1 ano' };
 const RANGE_MONTHS: Record<Range, number> = { '1M': 1, '6M': 6, '1A': 12 };
 
 /** Current value of 1 X expressed in B. */

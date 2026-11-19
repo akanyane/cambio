@@ -5,11 +5,11 @@
 //  - Fonts:          cache first.
 //  - Rate APIs:      network first, falling back to the last successful response.
 
-const VERSION = 'v1';
+const VERSION = 'v2';
 const SHELL = `cambio-shell-${VERSION}`;
 const RUNTIME = `cambio-runtime-${VERSION}`;
 const DATA = `cambio-data-${VERSION}`;
-const PRECACHE = ['/', '/manifest.webmanifest', '/favicon.svg', '/grain.png', '/icons/icon-192.png'];
+const PRECACHE = ['/', '/en/', '/manifest.webmanifest', '/favicon.svg', '/grain.png', '/icons/icon-192.png'];
 const API_HOSTS = ['api.frankfurter.dev', 'economia.awesomeapi.com.br', 'data-api.binance.vision'];
 const FONT_HOSTS = ['fonts.googleapis.com', 'fonts.gstatic.com'];
 
@@ -68,8 +68,10 @@ async function page(request) {
   try {
     return await networkFirst(request, RUNTIME);
   } catch {
-    // every page hydrates the same island, so the home page is a usable fallback
-    return (await caches.match('/', { cacheName: SHELL })) || Response.error();
+    // every page hydrates the same island and routes on the URL, so the home page in the
+    // same language is a usable fallback
+    const home = new URL(request.url).pathname.startsWith('/en/') ? '/en/' : '/';
+    return (await caches.match(home, { cacheName: SHELL })) || Response.error();
   }
 }
 

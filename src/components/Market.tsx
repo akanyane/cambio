@@ -1,6 +1,7 @@
 import { alertInfo } from '../lib/alerts';
 import { BY, GRID, MATRIX } from '../lib/currencies';
 import { dir, fmt, p2, pct } from '../lib/format';
+import { cname, inSentence, t } from '../lib/i18n';
 import { pairValue, pathD, prevOf, scale, series } from '../lib/model';
 import type { MarketData } from '../lib/rates';
 import { AlertForm } from './AlertForm';
@@ -62,22 +63,23 @@ function cardModel(data: MarketData, code: string, base: string) {
 export function MarketSection(p: Props) {
   const { data, base, view, setView } = p;
   const B = BY[base];
+  const T = t();
   return (
-    <section className="mk" aria-label="Principais moedas">
+    <section className="mk" aria-label={T.marketLabel}>
       <div className="wrap">
         <div className="sh">
           <span className="sh-n">03</span>
-          <span>Mercado</span>
-          <span className="sh-r">Valores em {base}</span>
+          <span>{T.market}</span>
+          <span className="sh-r">{T.valuesIn(base)}</span>
         </div>
         <div className="mk-head">
           <div>
             <h2 className="h2">
-              O mundo visto a partir {B.fem ? 'da' : 'do'} <em>{B.name}</em>
+              {T.worldFrom(B)} <em>{inSentence(B)}</em>
             </h2>
-            <p className="hint">Selecione uma moeda para colocá-la em destaque.</p>
+            <p className="hint">{T.pickHint}</p>
           </div>
-          <div className="seg" role="group" aria-label="Visualização">
+          <div className="seg" role="group" aria-label={T.viewLabel}>
             <button
               type="button"
               className={`seg-b ${view === 'grid' ? 'on' : ''}`}
@@ -85,7 +87,7 @@ export function MarketSection(p: Props) {
               aria-pressed={view === 'grid'}
             >
               <GridIco />
-              Grade
+              {T.views.grid}
             </button>
             <button
               type="button"
@@ -94,7 +96,7 @@ export function MarketSection(p: Props) {
               aria-pressed={view === 'list'}
             >
               <ListIco />
-              Lista
+              {T.views.list}
             </button>
             <button
               type="button"
@@ -103,7 +105,7 @@ export function MarketSection(p: Props) {
               aria-pressed={view === 'matrix'}
             >
               <MatrixIco />
-              Matriz
+              {T.views.matrix}
             </button>
           </div>
         </div>
@@ -130,6 +132,7 @@ function Grid({
   onOpen,
 }: Props) {
   const B = BY[base];
+  const T = t();
   return (
     <div className="grid">
       {orderedCodes(base, pins).map((code, i) => {
@@ -150,7 +153,7 @@ function Grid({
               className="card-hit"
               onClick={() => onFeature(code)}
               aria-pressed={isF}
-              aria-label={`Destacar ${c.name}`}
+              aria-label={T.feature(cname(c))}
             />
             <span className="card-top num">
               <span className="idx">{p2(i + 1)}</span>
@@ -160,7 +163,7 @@ function Grid({
                   className={`tool ${pinned ? 'on' : ''}`}
                   onClick={() => onTogglePin(code)}
                   aria-pressed={pinned}
-                  aria-label={`Fixar ${code} no topo`}
+                  aria-label={T.pinTop(code)}
                 >
                   <Pin />
                 </button>
@@ -168,7 +171,7 @@ function Grid({
                   type="button"
                   className={`tool ${bellOn ? 'on' : ''}`}
                   onClick={() => onOpenAlert(code)}
-                  aria-label={`Alerta de preço para ${code}`}
+                  aria-label={T.alertFor(code)}
                 >
                   <Bell />
                 </button>
@@ -181,7 +184,7 @@ function Grid({
                 {c.tile}
               </span>
             </span>
-            <span className="card-name">{c.name}</span>
+            <span className="card-name">{cname(c)}</span>
             <span className={`val ${flash[code] ?? ''}`}>
               <span className="val-sym">{B.sym}</span>
               <span className="sr">{m.val}</span>
@@ -211,7 +214,7 @@ function Grid({
             <span className="card-foot num">
               <span>7d {pct(m.wk)}</span>
               <button type="button" className="more" onClick={() => onOpen(code)}>
-                Detalhes <Arrow />
+                {T.details} <Arrow />
               </button>
             </span>
             {alertCtl.open === code && (
@@ -236,19 +239,20 @@ function Grid({
 }
 
 function List({ data, base, featured, pins, flash, motion, onFeature, onOpen }: Props) {
+  const T = t();
   return (
     <div className="tbl-box">
       <table className="tbl num">
         <thead>
           <tr>
-            <th>Moeda</th>
-            <th className="r">Valor em {base}</th>
-            <th className="r">Dia</th>
-            <th className="r">7 dias</th>
-            <th className="r">Tendência</th>
-            <th className="r">Inverso</th>
+            <th>{T.thCurrency}</th>
+            <th className="r">{T.thValueIn(base)}</th>
+            <th className="r">{T.thDay}</th>
+            <th className="r">{T.th7d}</th>
+            <th className="r">{T.thTrend}</th>
+            <th className="r">{T.inverse}</th>
             <th className="r">
-              <span className="sr">Abrir</span>
+              <span className="sr">{T.openAction}</span>
             </th>
           </tr>
         </thead>
@@ -266,7 +270,7 @@ function List({ data, base, featured, pins, flash, motion, onFeature, onOpen }: 
                   >
                     <span className="row-idx">{p2(i + 1)}</span>
                     <span className="row-code">{code}</span>
-                    <span className="row-name">{BY[code].name}</span>
+                    <span className="row-name">{cname(BY[code])}</span>
                   </button>
                 </td>
                 <td className="r">
@@ -288,13 +292,8 @@ function List({ data, base, featured, pins, flash, motion, onFeature, onOpen }: 
                   {fmt(1 / m.v)}
                 </td>
                 <td className="r">
-                  <button
-                    type="button"
-                    className="more"
-                    onClick={() => onOpen(code)}
-                    aria-label={`Abrir página de ${code}`}
-                  >
-                    Abrir <Arrow />
+                  <button type="button" className="more" onClick={() => onOpen(code)} aria-label={T.openPage(code)}>
+                    {T.openAction} <Arrow />
                   </button>
                 </td>
               </tr>
@@ -309,15 +308,16 @@ function List({ data, base, featured, pins, flash, motion, onFeature, onOpen }: 
 function Matrix({ data, base }: { data: MarketData; base: string }) {
   const mx = MATRIX.slice();
   if (!mx.includes(base)) mx[mx.length - 1] = base;
+  const T = t();
   return (
     <>
       <div className="mx-box">
         <table className="mx">
-          <caption className="sr">Câmbio cruzado: valor de 1 unidade da moeda da linha em cada moeda da coluna</caption>
+          <caption className="sr">{T.matrixCaption}</caption>
           <thead>
             <tr>
               <th className="c" scope="col">
-                1 unidade de ↓ em →
+                {T.matrixCorner}
               </th>
               {mx.map((c) => (
                 <th key={c} className={c === base ? 'base' : ''} scope="col">
@@ -355,9 +355,9 @@ function Matrix({ data, base }: { data: MarketData; base: string }) {
         </table>
       </div>
       <div className="mx-legend">
-        <span>Cor indica a variação do par no dia</span>
-        <span className="up">Alta acima de 0,05%</span>
-        <span className="dn">Queda abaixo de −0,05%</span>
+        <span>{T.matrixLegend}</span>
+        <span className="up">{T.matrixUp(pct(0.0005))}</span>
+        <span className="dn">{T.matrixDown(pct(-0.0005))}</span>
       </div>
     </>
   );

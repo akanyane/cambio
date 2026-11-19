@@ -4,7 +4,7 @@ An editorial-style currency dashboard: the world's currencies, seen from where y
 
 **Live:** https://cambio.akanyane.dev
 
-Built with **Astro + Preact (TypeScript, via `preact/compat`)** from the design handoff in `docs/design/`. The interface is in Brazilian Portuguese.
+Built with **Astro + Preact (TypeScript, via `preact/compat`)** from the design handoff in `docs/design/`. The interface is available in Brazilian Portuguese (`/`) and English (`/en/`); first-time visitors whose browser doesn't prefer Portuguese are sent to the English version.
 
 ## Features
 
@@ -44,16 +44,17 @@ All public, keyless and CORS-enabled, fetched directly from the browser.
 | Real-time crypto                                                                        | Binance WebSocket (combined `miniTicker` stream)                                           |
 | Fallback                                                                                | Frankfurter `/latest`; if nothing responds, the prototype's deterministic sample generator |
 
-Browser APIs used: `Intl` (pt-BR formatting and market time zones), History API (`/moeda/xxx` routes), `localStorage` (theme, base, pins, alerts, converter and a 6-hour history cache), Notifications, Page Visibility, Service Worker + Cache Storage (offline), online/offline events, `prefers-reduced-motion` and `prefers-color-scheme`.
+Browser APIs used: `Intl` (pt-BR/en-US formatting and market time zones), `navigator.languages`, History API (`/moeda/xxx` routes), `localStorage` (theme, base, pins, alerts, converter and a 6-hour history cache), Notifications, Page Visibility, Service Worker + Cache Storage (offline), online/offline events, `prefers-reduced-motion` and `prefers-color-scheme`.
 
 Rates are informational only. Do not use them for trading.
 
 ## Project structure
 
 - `src/lib/rates/`: data layer. One file per source; `index.ts` merges them into a single `MarketData` shape (units per 1 USD).
+- `src/lib/i18n.ts`: routes and interface strings for both languages.
 - `src/lib/model.ts`: series, ranges, chart scaling and volatility.
 - `src/components/`: Header/Ticker, BaseSelector, Featured, Market (grid, list, matrix), Converter, Detail, AlertForm, Odometer.
-- `src/pages/`: `index.astro` and `moeda/[code].astro` (26 static pages, all hydrating the same Preact island) and `og/[slug].png.ts` (Open Graph cards rendered at build time).
+- `src/pages/`: `index.astro` + `moeda/[code].astro` (Portuguese) and `en/index.astro` + `en/currency/[code].astro` (English), 54 static pages all hydrating the same Preact island, and `og/[slug].png.ts` (Open Graph cards rendered at build time).
 - `src/lib/images.ts`: build-time Open Graph cards and app icons (satori + resvg).
 - `public/sw.js`: service worker (network-first pages and rate APIs, cache-first assets and fonts).
 - `src/styles/global.css`: CSS ported from the design. No `border-radius` anywhere.

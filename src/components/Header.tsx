@@ -1,16 +1,26 @@
 import { useState } from 'react';
 import { MARKETS } from '../lib/currencies';
-import { clockStr, MONTHS_LONG, p2, WEEKDAYS } from '../lib/format';
+import { clockStr, p2 } from '../lib/format';
 import { useNow } from '../lib/hooks';
+import { getLocale, t } from '../lib/i18n';
 import { Moon, Sun } from './Icons';
 
 interface Props {
   theme: 'light' | 'dark';
   onToggleTheme: () => void;
   status: 'live' | 'sample' | 'offline';
+  /** Same page in the other language. */
+  altHref: string;
 }
 
-const STATUS_LABEL = { live: 'Ao vivo', sample: 'Exemplo', offline: 'Offline' };
+/** Remembers an explicit language choice so the home page stops auto-redirecting. */
+const rememberLang = (l: string) => {
+  try {
+    localStorage.setItem('cambio:lang', JSON.stringify(l));
+  } catch {
+    /* storage unavailable */
+  }
+};
 
 const WD: Record<string, number> = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
 const dur = (h: number) => {
@@ -39,14 +49,15 @@ function marketRows(now: Date) {
     } catch {
       /* time zone unavailable */
     }
-    const t = h + mi / 60;
+    const time = h + mi / 60;
     const weekday = wd >= 1 && wd <= 5;
-    const isOpen = weekday && t >= m.o && t < m.c;
+    const isOpen = weekday && time >= m.o && time < m.c;
+    const T = t();
     let note: string;
-    if (isOpen) note = `Fecha em ${dur(m.c - t)}`;
-    else if (weekday && t < m.o) note = `Abre em ${dur(m.o - t)}`;
-    else if (wd === 5 || wd === 6) note = `Abre segunda às ${hm(m.o)}`;
-    else note = `Abre amanhã às ${hm(m.o)}`;
+    if (isOpen) note = T.closesIn(dur(m.c - time));
+    else if (weekday && time < m.o) note = T.opensIn(dur(m.o - time));
+    else if (wd === 5 || wd === 6) note = T.opensMonday(hm(m.o));
+    else note = T.opensTomorrow(hm(m.o));
     return {
       ...m,
       isOpen,
@@ -54,37 +65,51 @@ function marketRows(now: Date) {
       time: `${p2(h)}:${p2(mi)}`,
       sL: (m.o / 24) * 100,
       sW: ((m.c - m.o) / 24) * 100,
-      nowL: (t / 24) * 100,
+      nowL: (time / 24) * 100,
       delay: 500 + i * 90,
     };
   });
 }
 
-export function Header({ theme, onToggleTheme, status }: Props) {
+export function Header({ theme, onToggleTheme, status, altHref }: Props) {
+  const T = t();
   const now = useNow();
   const start = new Date(now.getFullYear(), 0, 0);
   const edition = Math.floor((now.getTime() - start.getTime()) / 864e5);
-  const longDate = `${WEEKDAYS[now.getDay()]}, ${now.getDate()} de ${MONTHS_LONG[now.getMonth()]} de ${now.getFullYear()}`;
+  const longDate = T.longDate(T.weekdays[now.getDay()], now.getDate(), T.monthsLong[now.getMonth()], now.getFullYear());
+  const other = getLocale() === 'pt' ? 'en' : 'pt';
   const letters = ['C', 'â', 'm', 'b', 'i', 'o'];
 
   return (
     <div className="wrap">
       <div className="top lbl">
         <div className="top-l">
-          <span className="ed">Nº {edition}</span>
+          <span className="ed">
+            {T.edition} {edition}
+          </span>
           <span>{longDate}</span>
         </div>
         <div className="top-r">
           <span className={`live ${status === 'live' ? '' : status === 'sample' ? 'demo' : 'off'}`} role="status">
             <span className="dot" aria-hidden="true" />
-            {STATUS_LABEL[status]}
+            {T.status[status]}
           </span>
           <span className="clock num">{clockStr(now)}</span>
+          <a
+            className="lang"
+            href={altHref}
+            hrefLang={other}
+            lang={other}
+            aria-label={T.langSwitch}
+            onClick={() => rememberLang(other)}
+          >
+            {other.toUpperCase()}
+          </a>
           <button
             type="button"
             className="sq-btn"
             onClick={onToggleTheme}
-            aria-label={theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            aria-label={theme === 'dark' ? T.themeToLight : T.themeToDark}
           >
             {theme === 'dark' ? <Sun /> : <Moon />}
           </button>
@@ -102,17 +127,17 @@ export function Header({ theme, onToggleTheme, status }: Props) {
           })}
           <sup>FX</sup>
         </h1>
-        <p className="tagline">As moedas do mundo, vistas de onde você está.</p>
+        <p className="tagline">{T.brandTagline}</p>
       </div>
       <div className="rule" aria-hidden="true" />
-      <section className="mkts" aria-label="Horário dos mercados">
+      <section className="mkts" aria-label={T.marketsLabel}>
         {marketRows(now).map((m) => (
           <div key={m.city} className={`mkt ${m.isOpen ? 'on' : ''}`} style={{ animationDelay: `${m.delay}ms` }}>
             <div className="mkt-top">
-              <span className="mkt-city">{m.city}</span>
+              <span className="mkt-city">{T.cities[m.city]}</span>
               <span className={`mkt-st ${m.isOpen ? 'on' : ''}`}>
                 <span className="sq" aria-hidden="true" />
-                {m.isOpen ? 'Aberto' : 'Fechado'}
+                {m.isOpen ? T.open : T.closed}
               </span>
             </div>
             <div className="mkt-time num">
@@ -140,10 +165,11 @@ export interface TickerItem {
 export function Ticker({ items }: { items: TickerItem[] }) {
   const all = items.concat(items);
   const [paused, setPaused] = useState(false);
+  const T = t();
   return (
-    <section className={`ticker ${paused ? 'paused' : ''}`} aria-label="Cotações em tempo real">
+    <section className={`ticker ${paused ? 'paused' : ''}`} aria-label={T.tickerLabel}>
       <button type="button" className="tk-pause" aria-pressed={paused} onClick={() => setPaused(!paused)}>
-        {paused ? 'Retomar rolagem das cotações' : 'Pausar rolagem das cotações'}
+        {paused ? T.tickerResume : T.tickerPause}
       </button>
       <div className="track">
         {all.map((t, i) => (

@@ -28,12 +28,3 @@ export interface Observation {
   date: string;
   value: number;
 }
-
-/** UI label (pt-BR) for each source. */
-export const SOURCE_LABEL: Record<SourceId, string> = {
-  fixed: 'fixo',
-  ECB: 'BCE',
-  AwesomeAPI: 'AwesomeAPI',
-  Binance: 'Binance',
-  sample: 'exemplo',
-};

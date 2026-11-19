@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { BY } from './currencies';
-import { dayMonth, dir, fmt, fmtSigned, fold, lede, longDay, money, monthYear, parseAmt, pct } from './format';
+import { dayMonth, dir, fmt, fmtSigned, fold, longDay, money, monthYear, parseAmt, pct } from './format';
+import { lede } from './i18n';
 
 describe('fmt', () => {
   test('picks decimals by magnitude', () => {

@@ -1,0 +1,8 @@
+---
+import App from '../../components/App';
+import Layout from '../../layouts/Layout.astro';
+import { DICT } from '../../lib/i18n';
+---
+<Layout locale="en" title={DICT.en.titleHome}>
+  <App client:only="preact" locale="en" initialPage="home" />
+</Layout>

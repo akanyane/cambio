@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BY } from '../lib/currencies';
-import { dayMonth, dir, fmt, fmtSigned, lede, pct } from '../lib/format';
+import { dayMonth, dir, fmt, fmtSigned, pct } from '../lib/format';
+import { lede, t } from '../lib/i18n';
 import { pairValue, pathD, scale, series, seriesDates } from '../lib/model';
 import type { MarketData } from '../lib/rates';
 import { chartKeyHandler } from './chartKeys';
@@ -22,6 +23,7 @@ export const sizeCls = (s: string) => (s.length <= 7 ? 'xl' : s.length <= 11 ? '
 export function Featured({ data, base, code, flash, motion, onOpen }: Props) {
   const [hov, setHov] = useState<number | null>(null);
   useEffect(() => setHov(null), []);
+  const T = t();
   const F = BY[code];
   const B = BY[base];
   const fs = series(data, code, base, 8);
@@ -35,56 +37,58 @@ export function Featured({ data, base, code, flash, motion, onOpen }: Props) {
   const v = pairValue(data, code, base);
   const vStr = fmt(v);
   const hi = hov === null ? last : Math.max(0, Math.min(last, hov));
-  const labels = dates.map((iso, i) => (i === last ? 'Hoje' : dayMonth(iso)));
+  const labels = dates.map((iso, i) => (i === last ? T.today : dayMonth(iso)));
 
   return (
-    <section className="feat" aria-label="Moeda em destaque">
+    <section className="feat" aria-label={T.featuredLabel}>
       <div className="wrap">
         <div className="sh">
           <span className="sh-n">02</span>
-          <span>Em destaque</span>
+          <span>{T.featured}</span>
           <span className="sh-r">
             {code} / {base}
           </span>
         </div>
         <div className="feat-in">
           <div className="feat-left">
-            <p className="lede">{lede(F)} vale hoje</p>
+            <p className="lede">{T.worthToday(lede(F))}</p>
             <div className={`big ${sizeCls(vStr)}`}>
               <span className="big-sym">{B.sym}</span>
               <OdoValue value={vStr} flash={flash} booted={motion.booted} rollCls={motion.rollCls} />
             </div>
             <div className="delta">
               <span className={`delta-p ${dir(ch)}`}>{pct(ch)}</span>
-              <span className="delta-s num">{fmtSigned(fs[last] - fs[last - 1])} desde o fechamento</span>
+              <span className="delta-s num">
+                {fmtSigned(fs[last] - fs[last - 1])} {T.sinceClose}
+              </span>
             </div>
             <dl className="facts num">
               <div>
-                <dt>Fechamento</dt>
+                <dt>{T.close}</dt>
                 <dd>{fmt(fs[last - 1])}</dd>
               </div>
               <div>
-                <dt>Inverso</dt>
+                <dt>{T.inverse}</dt>
                 <dd>
                   {fmt(1 / v)} {code}
                 </dd>
               </div>
               <div>
-                <dt>Máx. 7d</dt>
+                <dt>{T.high7}</dt>
                 <dd>{fmt(Math.max(...fs))}</dd>
               </div>
               <div>
-                <dt>Mín. 7d</dt>
+                <dt>{T.low7}</dt>
                 <dd>{fmt(Math.min(...fs))}</dd>
               </div>
             </dl>
             <button type="button" className="link-btn" onClick={onOpen}>
-              Página completa de {code} <Arrow />
+              {T.fullPage(code)} <Arrow />
             </button>
           </div>
           <div className="feat-right">
             <div className="chart-head">
-              <span className="lbl">Sete sessões</span>
+              <span className="lbl">{T.sevenSessions}</span>
               <span className={`num ${dir(wk)}`}>7d {pct(wk)}</span>
             </div>
             <div className="crop">
@@ -95,8 +99,17 @@ export function Featured({ data, base, code, flash, motion, onOpen }: Props) {
               <div
                 className="chart"
                 role="slider"
-                aria-roledescription="gráfico"
-                aria-label={`${code} em ${base} nas últimas sete sessões: de ${fmt(fs[0])} em ${labels[0]} a ${fmt(fs[last])} hoje, ${pct(wk)}. Mínima ${fmt(Math.min(...fs))}, máxima ${fmt(Math.max(...fs))}.`}
+                aria-roledescription={T.chartRole}
+                aria-label={T.chartSummary(
+                  T.pairIn(code, base),
+                  T.lastSevenSessions,
+                  fmt(fs[0]),
+                  labels[0],
+                  fmt(fs[last]),
+                  pct(wk),
+                  fmt(Math.min(...fs)),
+                  fmt(Math.max(...fs)),
+                )}
                 aria-valuemin={0}
                 aria-valuemax={last}
                 aria-valuenow={hi}

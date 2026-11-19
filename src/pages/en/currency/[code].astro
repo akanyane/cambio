@@ -1,0 +1,16 @@
+---
+import App from '../../../components/App';
+import Layout from '../../../layouts/Layout.astro';
+import { BY, CODES } from '../../../lib/currencies';
+import { cname, DICT } from '../../../lib/i18n';
+
+export function getStaticPaths() {
+  return CODES.map((code) => ({ params: { code: code.toLowerCase() } }));
+}
+
+const code = String(Astro.params.code).toUpperCase();
+const name = cname(BY[code], 'en');
+---
+<Layout locale="en" code={code} title={`${name} (${code}) · Câmbio`} description={DICT.en.detailDescription(name, code)}>
+  <App client:only="preact" locale="en" initialPage="detail" initialDetail={code} />
+</Layout>

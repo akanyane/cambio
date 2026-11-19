@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { t } from '../lib/i18n';
 import type { Draft } from './types';
 
 interface Props {
@@ -27,6 +28,7 @@ export function AlertForm({
   onCancel,
   variant,
 }: Props) {
+  const T = t();
   const id = variant === 'pop' ? 'cx-alert' : 'cx-alert-d';
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -37,7 +39,7 @@ export function AlertForm({
   const field = (
     <>
       <label className="sr" htmlFor={id}>
-        Valor-alvo em {base}
+        {T.targetIn(base)}
       </label>
       <div className="pop-in">
         <span>{baseSym}</span>
@@ -67,16 +69,16 @@ export function AlertForm({
       onClick={(e) => e.stopPropagation()}
     >
       <p className="pop-h">
-        Avisar quando <em>{code}</em> ficar
+        {T.notifyWhen} <em>{code}</em> {T.notifyWhenTail}
       </p>
-      <div className="pop-seg" role="group" aria-label="Direção do alerta">
+      <div className="pop-seg" role="group" aria-label={T.alertDirLabel}>
         <button
           type="button"
           className={draft.dir === 'above' ? 'on' : ''}
           onClick={() => setDraft({ ...draft, dir: 'above' })}
           aria-pressed={draft.dir === 'above'}
         >
-          Acima de
+          {T.above}
         </button>
         <button
           type="button"
@@ -84,21 +86,21 @@ export function AlertForm({
           onClick={() => setDraft({ ...draft, dir: 'below' })}
           aria-pressed={draft.dir === 'below'}
         >
-          Abaixo de
+          {T.below}
         </button>
       </div>
       {variant === 'dpop' ? <div>{field}</div> : field}
       <div className="pop-act">
         <button type="submit" className="btn pri">
-          Salvar
+          {T.save}
         </button>
         {hasAlert && (
           <button type="button" className="btn" onClick={onRemove}>
-            Remover
+            {T.remove}
           </button>
         )}
         <button type="button" className="btn" onClick={onCancel}>
-          Cancelar
+          {T.cancel}
         </button>
       </div>
     </form>
