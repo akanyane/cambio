@@ -1,0 +1,15 @@
+---
+import App from '../../components/App';
+import Layout from '../../layouts/Layout.astro';
+import { BY, CODES } from '../../lib/currencies';
+
+export function getStaticPaths() {
+  return CODES.map((code) => ({ params: { code: code.toLowerCase() } }));
+}
+
+const code = String(Astro.params.code).toUpperCase();
+const c = BY[code];
+---
+<Layout title={`${c.name} (${code}) · Câmbio`} description={`Cotação, histórico de 1 ano, faixa de 52 semanas e conversões de ${c.name} (${code}).`}>
+  <App client:only="react" initialPage="detail" initialDetail={code} />
+</Layout>

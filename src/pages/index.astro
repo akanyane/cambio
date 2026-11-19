@@ -1,0 +1,7 @@
+---
+import App from '../components/App';
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Câmbio — as moedas do mundo, vistas de onde você está">
+  <App client:only="react" initialPage="home" />
+</Layout>

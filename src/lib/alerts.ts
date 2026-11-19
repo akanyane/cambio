@@ -1,0 +1,35 @@
+import type { Alert } from '../components/types';
+import { BY } from './currencies';
+import { fmt, nf } from './format';
+import type { MarketData } from './rates';
+
+/** Linha de status do alerta de `code` na base atual (ou null). */
+export function alertInfo(data: MarketData, alerts: Record<string, Alert>, code: string, base: string) {
+  const a = alerts[code];
+  if (!a || a.base !== base) return null;
+  const v = data.live[a.base] / data.live[code];
+  const word = a.dir === 'above' ? 'acima de' : 'abaixo de';
+  if (a.fired) return { cls: 'fired', text: `Alerta disparado · ${word} ${BY[a.base].sym} ${fmt(a.target)}` };
+  const dist = Math.abs(a.target / v - 1) * 100;
+  return { cls: '', text: `Alerta ${word} ${fmt(a.target)} · faltam ${nf(2).format(dist)}%` };
+}
+
+/** Verifica alertas contra as cotações atuais; devolve os disparados. */
+export function checkAlerts(data: MarketData, alerts: Record<string, Alert>) {
+  const fired: { code: string; text: string }[] = [];
+  let next: Record<string, Alert> | null = null;
+  for (const [code, a] of Object.entries(alerts)) {
+    if (a.fired || !data.live[code] || !data.live[a.base]) continue;
+    const v = data.live[a.base] / data.live[code];
+    if ((a.dir === 'above' && v >= a.target) || (a.dir === 'below' && v <= a.target)) {
+      next ??= { ...alerts };
+      next[code] = { ...a, fired: true };
+      const sym = BY[a.base].sym;
+      fired.push({
+        code,
+        text: `${code}/${a.base}${a.dir === 'above' ? ' passou de ' : ' caiu abaixo de '}${sym} ${fmt(a.target)}. Agora vale ${sym} ${fmt(v)}.`,
+      });
+    }
+  }
+  return { next, fired };
+}

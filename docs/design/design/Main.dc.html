@@ -1,0 +1,1496 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Câmbio — cotações</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wdth,wght@0,62..125,100..900;1,62..125,100..900&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#7A5F26}a:hover{color:#151513}
+.cx{--bg:#ECEFE8;--panel:#E3E8DF;--ink:#121613;--ink2:#343B36;--mute:#5C645E;--line:#CDD4C9;--line2:#A9B2A6;--accent:#C9A961;--accentInk:#7A5F26;--accentBg:rgba(201,169,97,.16);--up:#2D6A4E;--down:#9A3A31;--upBg:rgba(45,106,78,.10);--downBg:rgba(154,58,49,.10);--ease:cubic-bezier(0.22,1,0.36,1);
+  --serif:'Archivo','Helvetica Neue',Arial,sans-serif;--mono:'Archivo','Helvetica Neue',Arial,sans-serif;--num:'Archivo','Helvetica Neue',Arial,sans-serif;
+  background:var(--bg);color:var(--ink);font-family:var(--mono);font-weight:450;font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased;transition:background-color .6s var(--ease),color .6s var(--ease);overflow-x:hidden}
+.cx.dark{--bg:#0D1311;--panel:#15201C;--ink:#E7ECE6;--ink2:#C2CAC3;--mute:#8C978F;--line:#1F2B26;--line2:#34433C;--accentInk:#C9A961;--accentBg:rgba(201,169,97,.12);--up:#82BB9C;--down:#DC8C81;--upBg:rgba(130,187,156,.12);--downBg:rgba(220,140,129,.12)}
+.cx *,.cx *::before,.cx *::after{border-radius:0 !important;box-sizing:border-box}
+.cx button,.cx input,.cx select,.cx output{font:inherit;color:inherit}
+.cx button{background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.cx :focus-visible{outline:2px solid var(--accentInk);outline-offset:3px}
+.cx em{font-style:normal}
+.word em{color:var(--accentInk)}
+.cx ::selection{background:var(--accent);color:#151513}
+.wrap{max-width:1360px;margin:0 auto;padding:0 56px}
+.serif{font-family:var(--serif);font-weight:640}
+.num{font-variant-numeric:tabular-nums lining-nums}
+.lbl{font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:var(--mute)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:square;flex:none}
+.ico-lg{width:20px;height:20px}
+.up{color:var(--up)}.dn{color:var(--down)}
+
+/* ---------- masthead ---------- */
+.top{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;min-height:52px;border-bottom:1px solid var(--line)}
+.top-l,.top-r{display:flex;align-items:center;gap:22px;flex-wrap:wrap}
+.live{display:flex;align-items:center;gap:10px;color:var(--up);font-weight:600}
+.dot{width:6px;height:6px;background:var(--up);position:relative;flex:none}
+.dot::after{content:'';position:absolute;inset:-5px;border:1px solid var(--up);animation:pulse 2.4s var(--ease) infinite}
+@keyframes pulse{0%{transform:scale(.4);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.clock{color:var(--ink2);letter-spacing:.06em}
+.sq-btn{width:44px;height:44px;display:flex !important;align-items:center;justify-content:center;border-left:1px solid var(--line) !important;transition:background-color .3s var(--ease)}
+.sq-btn:hover{background:var(--panel) !important}
+.mast{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:40px;padding:36px 0 26px}
+.word{font-family:var(--serif);font-weight:800;font-stretch:110%;font-size:clamp(64px,10vw,148px);line-height:.82;letter-spacing:-.03em;margin:0;display:flex;align-items:flex-start;gap:0}
+.word em{font-weight:800}
+.word sup{font-family:var(--mono);font-size:11px;letter-spacing:.16em;font-weight:500;color:var(--accentInk);margin-top:.9em;padding:4px 6px;border:1px solid var(--accent);line-height:1}
+@keyframes wordIn{from{opacity:0;letter-spacing:.02em}to{opacity:1;letter-spacing:-.03em}}
+.tagline{font-family:var(--serif);font-weight:500;font-size:21px;line-height:1.3;color:var(--ink2);text-align:right;margin:0;max-width:300px;}
+.rule{height:5px;border-top:2px solid var(--ink);border-bottom:1px solid var(--ink)}
+.ticker{overflow:hidden;border-bottom:1px solid var(--line);height:44px;display:flex;align-items:center;mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.track{display:flex;flex:none;animation:tick 70s linear infinite}
+.ticker:hover .track{animation-play-state:paused}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+.tk{display:flex;align-items:baseline;gap:10px;padding:0 26px;white-space:nowrap;border-right:1px solid var(--line);font-size:12px}
+.tk b{font-family:var(--num);font-weight:700;font-stretch:112%;letter-spacing:.04em}
+.tk span.v{color:var(--ink2)}
+
+/* ---------- section headers ---------- */
+.sh{display:flex;align-items:baseline;gap:18px;border-top:1px solid var(--ink);padding-top:12px;font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase}
+.sh-n{color:var(--accentInk)}
+.sh-r{margin-left:auto;color:var(--mute)}
+
+/* ---------- 01 ponto de vista ---------- */
+.pov{padding:56px 0 64px}
+.pov-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:48px;align-items:end;margin-top:36px}
+.pov-pick{position:relative;min-width:0}
+.sentence{font-family:var(--serif);font-weight:640;font-size:clamp(34px,4.6vw,64px);line-height:1.08;letter-spacing:-.025em;margin:0;text-wrap:balance}
+.pick{display:inline-flex !important;align-items:center;gap:.28em;border-bottom:1px solid var(--ink) !important;padding:0 .05em .04em !important;position:relative;transition:color .4s var(--ease)}
+.pick::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:3px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .55s var(--ease)}
+.pick:hover::after,.pick.open::after{transform:scaleX(1)}
+.pick-code{font-family:var(--num);font-style:normal;font-size:.26em;letter-spacing:.06em;font-weight:700;font-stretch:112%;border:1px solid var(--line2);padding:.35em .55em;align-self:center;color:var(--ink2)}
+.pick .ico{width:.42em;height:.42em;stroke-width:1.2;align-self:center;transition:transform .5s var(--ease)}
+.pick.open .ico{transform:rotate(180deg)}
+.quick{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
+.quick-row{display:flex;gap:0;border:1px solid var(--line2)}
+.qb{height:44px;min-width:58px;display:flex !important;align-items:center;justify-content:center;padding:0 12px !important;font-family:var(--num);font-weight:700;font-stretch:112%;font-size:13px;letter-spacing:.04em;transition:background-color .3s var(--ease),color .3s var(--ease);text-align:center !important}
+.qb+.qb{border-left:1px solid var(--line2) !important}
+.qb:hover{background:var(--panel) !important}
+.qb.on{background:var(--ink) !important;color:var(--bg)}
+.backdrop{position:fixed;inset:0;z-index:20;cursor:default !important}
+.panel{position:absolute;left:0;top:calc(100% + 18px);width:460px;max-width:calc(100vw - 40px);background:var(--bg);border:1px solid var(--ink);z-index:30;animation:drop .45s var(--ease) both}
+.panel::before{content:'';position:absolute;inset:6px -7px -7px 6px;border:1px solid var(--line2);z-index:-1;background:var(--bg)}
+@keyframes drop{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:none}}
+.search{display:flex;align-items:center;gap:12px;padding:0 18px;border-bottom:1px solid var(--ink);height:56px;color:var(--mute);background:var(--bg)}
+.search input{flex:1;border:0;background:transparent;height:100%;font-size:14px;color:var(--ink);outline:none;min-width:0}
+.search input::placeholder{color:var(--mute)}
+.opt-list{max-height:372px;overflow-y:auto;background:var(--bg)}
+.opt{width:100%;display:grid !important;grid-template-columns:28px 48px minmax(0,1fr) 16px;align-items:center;gap:14px;padding:0 18px !important;min-height:50px;border-bottom:1px solid var(--line) !important;transition:background-color .25s var(--ease),padding .35s var(--ease)}
+.opt:hover{background:var(--panel) !important;padding-left:24px !important}
+.opt-sym{font-family:var(--serif);font-weight:600;font-size:17px;color:var(--mute);text-align:center}
+.opt-code{font-family:var(--num);font-size:14px;letter-spacing:.03em;font-weight:700;font-stretch:112%}
+.opt-name{font-family:var(--serif);font-weight:500;font-size:16px;color:var(--ink2)}
+.opt .ico{color:var(--accentInk)}
+.empty{padding:22px 18px;color:var(--mute)}
+
+/* ---------- odometer ---------- */
+.odo{display:inline-flex;align-items:flex-start;height:1.1em;line-height:1.1em;overflow:hidden}
+.odo-col{display:inline-block;height:1.1em;overflow:hidden}
+.odo-strip{display:flex;flex-direction:column;transition:transform .9s var(--ease)}
+.odo-strip span{display:block;height:1.1em;line-height:1.1em;text-align:center}
+.odo-sep{display:inline-block;height:1.1em;line-height:1.1em}
+
+/* ---------- 02 destaque ---------- */
+.feat{padding:0 0 72px}
+.feat-in{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:80px;margin-top:40px;align-items:stretch}
+.feat-left{display:flex;flex-direction:column;gap:26px;min-width:0}
+.lede{font-family:var(--serif);font-weight:500;font-size:24px;margin:0;color:var(--ink2)}
+.big{display:flex;align-items:flex-start;gap:16px;font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;white-space:nowrap;font-variant-numeric:tabular-nums lining-nums}
+.big.xl{font-size:clamp(56px,7.4vw,116px)}
+.big.lg{font-size:clamp(44px,5.6vw,88px)}
+.big.md{font-size:clamp(38px,4.6vw,70px)}
+.big-sym{font-family:var(--mono);font-size:13px;letter-spacing:.1em;color:var(--mute);margin-top:.9em;font-weight:400}
+.big-num{padding:0 4px;margin:0 -4px}
+.delta{display:flex;align-items:baseline;gap:22px;flex-wrap:wrap;font-size:13px}
+.delta-p{font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:30px;font-variant-numeric:tabular-nums lining-nums}
+.delta-s{color:var(--mute)}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));margin:auto 0 0;border-top:1px solid var(--line)}
+.facts div{padding:16px 0 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.facts div:nth-child(odd){padding-right:20px;border-right:1px solid var(--line)}
+.facts div:nth-child(even){padding-left:20px}
+.facts dt{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.facts dd{margin:0;font-size:13px}
+.feat-right{display:flex;flex-direction:column;gap:20px;min-width:0}
+.chart-head{display:flex;justify-content:space-between;align-items:baseline;gap:16px}
+.crop{position:relative;padding:22px 0 0}
+.crop i{position:absolute;width:14px;height:14px;border:0 solid var(--accent);pointer-events:none}
+.crop i.tl{top:0;left:-14px;border-top-width:1px;border-left-width:1px}
+.crop i.tr{top:0;right:-14px;border-top-width:1px;border-right-width:1px}
+.crop i.bl{bottom:-14px;left:-14px;border-bottom-width:1px;border-left-width:1px}
+.crop i.br{bottom:-14px;right:-14px;border-bottom-width:1px;border-right-width:1px}
+.chart{position:relative}
+.chart-svg{width:100%;height:auto;display:block;overflow:visible}
+.gl{stroke:var(--line);stroke-width:1;fill:none}
+.ref{stroke:var(--line2);stroke-width:1;fill:none;stroke-dasharray:2 4}
+.chart-line{fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round;stroke-dasharray:1400;stroke-dashoffset:0}
+.area{fill:var(--accent);opacity:.16;stroke:none}
+.chart-dot{fill:var(--bg);stroke:var(--ink);stroke-width:1.5;transition:x .5s var(--ease),y .5s var(--ease)}
+.chart-line.draw-a{animation:dlA 1.4s var(--ease) both}.chart-line.draw-b{animation:dlB 1.4s var(--ease) both}
+.area.draw-a{animation:faA 1.4s var(--ease) both}.area.draw-b{animation:faB 1.4s var(--ease) both}
+@keyframes dlA{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}@keyframes dlB{from{stroke-dashoffset:1400}to{stroke-dashoffset:0}}
+@keyframes faA{0%,35%{opacity:0}100%{opacity:.16}}@keyframes faB{0%,35%{opacity:0}100%{opacity:.16}}
+.yl{position:absolute;left:0;font-size:11px;color:var(--mute);background:var(--bg);padding:2px 6px 2px 0}
+.yl.hi{top:-2px}.yl.lo{bottom:-6px}
+.hits{position:absolute;inset:0 2.5% 0 0;display:flex}
+.hit{flex:1;cursor:crosshair}
+.xh{position:absolute;top:0;bottom:0;width:1px;background:var(--ink);opacity:.5;pointer-events:none}
+.tip{position:absolute;transform:translate(12px,-50%);background:var(--ink);color:var(--bg);padding:8px 12px;display:flex;flex-direction:column;gap:3px;pointer-events:none;white-space:nowrap;font-size:11px;letter-spacing:.06em;animation:tipIn .3s var(--ease) both}
+.tip.r{transform:translate(calc(-100% - 12px),-50%)}
+.tip strong{font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:20px;}
+@keyframes tipIn{from{opacity:0}to{opacity:1}}
+.axis{display:flex;justify-content:space-between;padding-right:2.5%;font-size:11px;color:var(--mute);border-top:1px solid var(--ink);padding-top:10px;margin-top:6px}
+.axis span{position:relative}
+.axis span::before{content:'';position:absolute;top:-10px;left:50%;width:1px;height:5px;background:var(--ink)}
+.axis span:first-child::before{left:0}.axis span:last-child::before{left:auto;right:0}
+
+/* ---------- 03 mercado ---------- */
+.mk{padding:0 0 80px}
+.mk-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin:40px 0 32px}
+.h2{font-family:var(--serif);font-weight:640;font-size:clamp(32px,3.6vw,50px);letter-spacing:-.025em;margin:0;line-height:1.05;text-wrap:balance;max-width:760px}
+.h2 em{color:var(--accentInk)}
+.hint{margin:12px 0 0;color:var(--mute);font-size:12px}
+.seg{display:flex;border:1px solid var(--line2)}
+.seg-b{height:44px;display:flex !important;align-items:center;gap:10px;padding:0 18px !important;font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;transition:background-color .3s var(--ease),color .3s var(--ease)}
+.seg-b+.seg-b{border-left:1px solid var(--line2) !important}
+.seg-b:hover{background:var(--panel) !important}
+.seg-b.on{background:var(--ink) !important;color:var(--bg)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-top:1px solid var(--ink);border-left:1px solid var(--line)}
+.card{position:relative;display:flex !important;flex-direction:column;gap:10px;padding:20px 24px 20px !important;min-height:272px;border-right:1px solid var(--line) !important;border-bottom:1px solid var(--line) !important;background:var(--bg) !important;transition:transform .5s var(--ease),background-color .5s var(--ease);animation:rise .8s var(--ease) backwards;width:100%}
+.card::after{content:'';position:absolute;left:-1px;right:-1px;bottom:-1px;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left center;transition:transform .55s var(--ease)}
+.card:hover{transform:translateY(-4px);background:var(--panel) !important;z-index:2}
+.card:hover::after,.card.feat-on::after{transform:scaleX(1)}
+.card.feat-on{background:var(--panel) !important}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.card-top{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.08em}
+.idx{color:var(--mute)}
+.card-id{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-top:10px}
+.card-code{font-family:var(--num);font-size:30px;font-weight:720;font-stretch:115%;letter-spacing:.01em;line-height:1}
+.card-sym{font-family:var(--serif);font-weight:640;font-size:30px;color:var(--line2);line-height:1;transition:color .5s var(--ease)}
+.card:hover .card-sym{color:var(--accent)}
+.card-name{font-size:12px;color:var(--mute)}
+.val{font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:30px;display:flex;align-items:flex-start;gap:8px;white-space:nowrap;padding:2px 4px;margin:6px -4px 0;font-variant-numeric:tabular-nums lining-nums}
+.val-sym{font-family:var(--mono);font-size:11px;letter-spacing:.08em;color:var(--mute);margin-top:.5em}
+.spark{width:100%;height:auto;display:block;margin-top:auto;overflow:visible}
+.spark-line{fill:none;stroke:var(--ink2);stroke-width:1.3;stroke-linejoin:round;stroke-dasharray:420;stroke-dashoffset:0}
+.spark-line.up{stroke:var(--up)}.spark-line.dn{stroke:var(--down)}
+.spark-end{fill:var(--ink)}
+.spark-line.draw-a{animation:dsA 1.2s var(--ease) both}.spark-line.draw-b{animation:dsB 1.2s var(--ease) both}
+@keyframes dsA{from{stroke-dashoffset:420}to{stroke-dashoffset:0}}@keyframes dsB{from{stroke-dashoffset:420}to{stroke-dashoffset:0}}
+.card-foot{display:flex;justify-content:space-between;gap:12px;font-size:11px;letter-spacing:.04em;color:var(--mute);border-top:1px solid var(--line);padding-top:10px}
+.fl-up-a{animation:fuA 1s var(--ease)}.fl-up-b{animation:fuB 1s var(--ease)}
+.fl-dn-a{animation:fdA 1s var(--ease)}.fl-dn-b{animation:fdB 1s var(--ease)}
+@keyframes fuA{0%,30%{color:var(--up);background:var(--upBg)}100%{background:transparent}}
+@keyframes fuB{0%,30%{color:var(--up);background:var(--upBg)}100%{background:transparent}}
+@keyframes fdA{0%,30%{color:var(--down);background:var(--downBg)}100%{background:transparent}}
+@keyframes fdB{0%,30%{color:var(--down);background:var(--downBg)}100%{background:transparent}}
+
+/* lista */
+.tbl-box{overflow-x:auto;border-top:1px solid var(--ink)}
+.tbl{width:100%;min-width:860px;border-collapse:collapse}
+.tbl th{font-size:10.5px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);text-align:left;padding:14px 16px;border-bottom:1px solid var(--line)}
+.tbl th.r,.tbl td.r{text-align:right}
+.tbl td{padding:12px 16px;border-bottom:1px solid var(--line);vertical-align:middle}
+.tbl tr.row{animation:rise .6s var(--ease) backwards;transition:background-color .3s var(--ease)}
+.tbl tr.row:hover{background:var(--panel)}
+.row-btn{display:flex !important;align-items:center;gap:16px;min-height:44px}
+.row-idx{color:var(--mute);font-size:11px;width:20px}
+.row-code{font-family:var(--num);font-weight:720;font-stretch:115%;letter-spacing:.01em;font-size:20px;width:64px}
+.row-name{color:var(--ink2)}
+.row-btn:hover .row-name{text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--accent)}
+.row-val{font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:22px;font-variant-numeric:tabular-nums lining-nums;padding:2px 4px;white-space:nowrap}
+.tbl .spark{width:120px;margin:0 0 0 auto}
+
+/* matriz */
+.mx-box{overflow-x:auto;border-top:1px solid var(--ink)}
+.mx{width:100%;min-width:860px;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.mx th{font-family:var(--num);font-stretch:112%;font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--mute);padding:14px 12px;text-align:right;border-bottom:1px solid var(--line)}
+.mx th.c{text-align:left}
+.mx th.base{color:var(--accentInk)}
+.mx td{padding:14px 12px;text-align:right;border-bottom:1px solid var(--line);font-size:12px;transition:background-color .3s var(--ease)}
+.mx td.rh{text-align:left;font-family:var(--num);font-weight:720;font-stretch:115%;letter-spacing:.01em;font-size:18px}
+.mx td.base,.mx tr.base td{background:var(--accentBg)}
+.mx td.diag{color:var(--line2)}
+.mx td.s-up{color:var(--up)}.mx td.s-dn{color:var(--down)}
+.mx tbody tr:hover td{background:var(--panel)}
+.mx-legend{display:flex;gap:24px;flex-wrap:wrap;margin-top:14px;font-size:11px;color:var(--mute)}
+
+/* ---------- 04 conversor ---------- */
+.conv{padding:0 0 80px}
+.conv-in{display:grid;grid-template-columns:minmax(0,1fr) 64px minmax(0,1fr);gap:28px;align-items:end;margin-top:40px}
+.cf{display:flex;flex-direction:column;gap:12px;min-width:0}
+.cf-line{display:flex;align-items:stretch;border-bottom:1px solid var(--ink);height:88px;position:relative}
+.cf-line::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .55s var(--ease)}
+.cf-line:focus-within::after{transform:scaleX(1)}
+.cf-in{flex:1;min-width:0;border:0;background:transparent;padding:0;font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:clamp(36px,4vw,56px);font-variant-numeric:tabular-nums lining-nums;outline:none;display:flex;align-items:center;white-space:nowrap;overflow:hidden}
+.cf-out{color:var(--ink)}
+.cf-name{font-family:var(--serif);font-weight:500;font-size:17px;color:var(--mute)}
+.sel{position:relative;display:flex;align-items:center;flex:none}
+.sel select{appearance:none;-webkit-appearance:none;border:1px solid var(--line2);background:transparent;height:44px;padding:0 36px 0 14px;font-size:13px;letter-spacing:.08em;cursor:pointer;outline:none;width:108px;font-weight:500;transition:border-color .3s var(--ease)}
+.sel select:hover{border-color:var(--ink)}
+.sel select option{color:#151513;background:#ECEFE8}
+.sel .ico{position:absolute;right:12px;pointer-events:none;color:var(--mute)}
+.swap{width:64px;height:64px;border:1px solid var(--ink) !important;display:flex !important;align-items:center;justify-content:center;margin-bottom:12px;transition:background-color .35s var(--ease),color .35s var(--ease)}
+.swap:hover{background:var(--ink) !important;color:var(--bg)}
+.swap svg{transition:transform .6s var(--ease)}
+.conv-foot{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;margin-top:28px}
+.amts{display:flex;gap:0;border:1px solid var(--line2)}
+.amt{height:40px;padding:0 14px !important;font-size:12px;transition:background-color .3s var(--ease);display:flex !important;align-items:center}
+.amt+.amt{border-left:1px solid var(--line2) !important}
+.amt:hover{background:var(--panel) !important}
+.rate{color:var(--mute);font-size:12px;letter-spacing:.02em}
+.rate b{color:var(--ink);font-weight:500}
+
+/* ---------- colofão ---------- */
+.colo{border-top:2px solid var(--ink);padding:28px 0 40px}
+.colo-in{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr);gap:40px;font-size:12px;color:var(--mute);line-height:1.6}
+.colo-word{font-family:var(--serif);font-weight:640;font-size:28px;color:var(--ink);letter-spacing:-.02em;line-height:1;margin-bottom:10px}
+.colo p{margin:6px 0 0}
+
+/* ---------- responsivo ---------- */
+@media (max-width:1100px){
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .feat-in{grid-template-columns:minmax(0,1fr);gap:56px}
+  .pov-in{grid-template-columns:minmax(0,1fr)}
+  .quick{align-items:flex-start}
+  .colo-in{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .wrap{padding:0 20px}
+  .top-l .ed{display:none}
+  .mast{grid-template-columns:minmax(0,1fr);gap:16px;padding:28px 0 20px}
+  .tagline{text-align:left;font-size:18px}
+  .pov{padding:40px 0 48px}
+  .quick,.quick-row{width:100%}
+  .qb{flex:1;min-width:0}
+  .conv-in{grid-template-columns:minmax(0,1fr);gap:16px}
+  .swap{width:100%;height:52px;margin:0}
+  .swap svg{rotate:90deg}
+  .feat,.mk,.conv{padding-bottom:56px}
+  .crop i{display:none}
+  .colo-in{grid-template-columns:minmax(0,1fr);gap:20px}
+}
+@media (max-width:640px){
+  .grid{grid-template-columns:minmax(0,1fr)}
+  .card{min-height:0}
+  .facts{grid-template-columns:minmax(0,1fr)}
+  .facts div:nth-child(odd){padding-right:0;border-right:0}
+  .facts div:nth-child(even){padding-left:0}
+}
+
+/* ---------- textura de papel ---------- */
+.cx::before{content:'';position:fixed;inset:0;background-image:url(/_blob/1941bfd4888134ac00c5eb3ba25bc83d);background-size:256px 256px;pointer-events:none;z-index:55;mix-blend-mode:multiply;opacity:.85}
+.cx.dark::before{mix-blend-mode:screen;opacity:.28}
+
+/* ---------- entrada do cabeçalho ---------- */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes letterIn{from{opacity:0;transform:translateY(.22em)}to{opacity:1;transform:none}}
+@keyframes ruleIn{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+.top{animation:fadeIn .9s var(--ease) both}
+.word .l{display:inline-block;animation:letterIn 1.2s var(--ease) both}
+.word sup{animation:fadeIn .8s var(--ease) .75s both}
+.tagline{animation:rise 1s var(--ease) .5s both}
+.rule{transform-origin:left center;animation:ruleIn 1.3s var(--ease) .2s both}
+.ticker{animation:fadeIn 1s var(--ease) 1.1s both}
+
+/* ---------- odômetro com desfoque ---------- */
+@keyframes rollA{0%{filter:blur(0)}22%{filter:blur(1.4px)}100%{filter:blur(0)}}
+@keyframes rollB{0%{filter:blur(0)}22%{filter:blur(1.4px)}100%{filter:blur(0)}}
+.odo.roll-a{animation:rollA 1s var(--ease)}.odo.roll-b{animation:rollB 1s var(--ease)}
+
+/* ---------- cortina de tema ---------- */
+.curtain{position:fixed;inset:0;z-index:70;pointer-events:none;border-left:2px solid var(--accent);border-right:2px solid var(--accent);transform:translateX(-102%)}
+.curtain.to-dark{background:#0D1311}.curtain.to-light{background:#ECEFE8}
+.curtain.cur-a{animation:curA .95s cubic-bezier(.76,0,.24,1) both}.curtain.cur-b{animation:curB .95s cubic-bezier(.76,0,.24,1) both}
+@keyframes curA{0%{transform:translateX(-102%)}42%,58%{transform:translateX(0)}100%{transform:translateX(102%)}}
+@keyframes curB{0%{transform:translateX(-102%)}42%,58%{transform:translateX(0)}100%{transform:translateX(102%)}}
+
+/* ---------- relógio dos mercados ---------- */
+.mkts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--line)}
+.mkt{padding:18px 22px 18px 0;display:flex;flex-direction:column;gap:9px;min-width:0;animation:rise .9s var(--ease) backwards}
+.mkt+.mkt{padding-left:22px;border-left:1px solid var(--line)}
+.mkt-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.mkt-city{font-family:var(--serif);font-weight:640;font-size:21px;line-height:1}
+.mkt-st{display:flex;align-items:center;gap:7px;font-size:10px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.mkt-st .sq{width:6px;height:6px;border:1px solid var(--mute)}
+.mkt-st.on{color:var(--up)}.mkt-st.on .sq{background:var(--up);border-color:var(--up)}
+.mkt-time{font-size:13px;color:var(--ink2);display:flex;gap:8px;align-items:baseline}
+.mkt-time .lbl{font-size:10px}
+.mkt-bar{position:relative;height:5px;background:var(--line)}
+.mkt-sess{position:absolute;top:0;bottom:0;background:var(--line2)}
+.mkt.on .mkt-sess{background:var(--accent)}
+.mkt-now{position:absolute;top:-4px;bottom:-4px;width:1px;background:var(--ink)}
+.mkt-note{font-size:11px;color:var(--mute)}
+
+/* ---------- cards: ferramentas, alertas ---------- */
+.card-hit{position:absolute;inset:0;z-index:1;cursor:pointer}
+.card-hit:focus-visible{outline-offset:-4px !important}
+.card.pinned::before{content:'';position:absolute;top:-1px;left:-1px;width:9px;height:9px;background:var(--accent);z-index:2}
+.card-top{gap:4px}
+.tools{display:flex;margin:-12px 6px -12px auto;position:relative;z-index:2}
+.tool{width:40px;height:44px;display:flex !important;align-items:center;justify-content:center;color:var(--mute);transition:color .3s var(--ease)}
+.tool:hover{color:var(--ink)}
+.tool .ico{width:15px;height:15px;transition:fill .3s var(--ease)}
+.tool.on{color:var(--accentInk)}.tool.on .ico{fill:var(--accent)}
+.alert-line{display:flex;align-items:center;gap:9px;font-size:11px;color:var(--accentInk);letter-spacing:.02em}
+.alert-line .dm{width:6px;height:6px;border:1px solid currentColor;transform:rotate(45deg);flex:none}
+.alert-line.fired{color:#151513;background:var(--accent);padding:4px 8px;align-self:flex-start;animation:fadeIn .5s var(--ease) both}
+.more{position:relative;z-index:2;display:inline-flex !important;align-items:center;gap:6px;color:var(--ink);min-height:44px;margin:-14px 0 -14px;transition:gap .35s var(--ease)}
+.more:hover{gap:10px}
+.more .ico{width:12px;height:12px}
+.pop{position:absolute;inset:0;z-index:4;background:var(--bg);border:1px solid var(--ink);padding:20px 22px;display:flex;flex-direction:column;gap:14px;animation:popIn .45s var(--ease) both;cursor:default}
+@keyframes popIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.pop-h{font-family:var(--serif);font-weight:640;font-size:20px;line-height:1.2;margin:0}
+.pop-h em{color:var(--accentInk)}
+.pop-seg{display:flex;border:1px solid var(--line2)}
+.pop-seg button{flex:1;height:40px;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;text-align:center !important;transition:background-color .3s var(--ease),color .3s var(--ease)}
+.pop-seg button+button{border-left:1px solid var(--line2) !important}
+.pop-seg button.on{background:var(--ink) !important;color:var(--bg)}
+.pop-in{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid var(--ink);height:52px}
+.pop-in span{color:var(--mute);font-size:12px}
+.pop-in input{flex:1;min-width:0;border:0;background:transparent;font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:30px;outline:none;font-variant-numeric:tabular-nums lining-nums;height:100%}
+.pop-act{display:flex;gap:8px;margin-top:auto;flex-wrap:wrap}
+.btn{height:44px;display:inline-flex !important;align-items:center;justify-content:center;gap:9px;padding:0 16px !important;border:1px solid var(--line2) !important;font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;transition:background-color .3s var(--ease),color .3s var(--ease),border-color .3s var(--ease)}
+.btn:hover{border-color:var(--ink) !important}
+.btn.pri{background:var(--ink) !important;color:var(--bg);border-color:var(--ink) !important}
+.btn.pri:hover{background:var(--accentInk) !important;border-color:var(--accentInk) !important}
+.btn.on{color:var(--accentInk);border-color:var(--accent) !important}
+.btn.on .ico{fill:var(--accent)}
+.link-btn{display:inline-flex !important;align-items:center;gap:10px;min-height:44px;font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;border-bottom:1px solid var(--ink) !important;align-self:flex-start;transition:gap .4s var(--ease),color .3s var(--ease)}
+.link-btn:hover{gap:16px;color:var(--accentInk)}
+
+/* ---------- aviso ---------- */
+.toast{position:fixed;right:28px;bottom:28px;z-index:60;width:400px;max-width:calc(100vw - 40px);background:var(--ink);color:var(--bg);display:grid;grid-template-columns:4px minmax(0,1fr) 48px;animation:toastIn .7s var(--ease) both}
+@keyframes toastIn{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.toast-mark{background:var(--accent)}
+.toast-body{padding:16px 18px 18px}
+.toast-body .lbl{color:var(--accent)}
+.toast-body p{margin:8px 0 0;font-family:var(--serif);font-weight:560;font-size:19px;line-height:1.3}
+.toast-x{display:flex !important;align-items:flex-start;justify-content:center;padding-top:14px !important;color:var(--bg);opacity:.7}
+.toast-x:hover{opacity:1}
+
+/* ---------- página de detalhe ---------- */
+.chart-line.dline{stroke-dasharray:7000}
+.chart-line.dline.draw-a{animation:ddA 1.8s var(--ease) both}.chart-line.dline.draw-b{animation:ddB 1.8s var(--ease) both}
+@keyframes ddA{from{stroke-dashoffset:7000}to{stroke-dashoffset:0}}@keyframes ddB{from{stroke-dashoffset:7000}to{stroke-dashoffset:0}}
+@keyframes pageIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.dt{padding:28px 0 88px;animation:pageIn .8s var(--ease) both}
+.dt-nav{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.back{height:44px;display:inline-flex !important;align-items:center;gap:10px;padding:0 16px 0 12px !important;border:1px solid var(--ink) !important;font-size:10.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;transition:background-color .35s var(--ease),color .35s var(--ease)}
+.back:hover{background:var(--ink) !important;color:var(--bg)}
+.back .ico{transition:transform .4s var(--ease)}
+.back:hover .ico{transform:translateX(-3px)}
+.crumb{color:var(--mute)}
+.crumb b{color:var(--ink);font-weight:500}
+.dt-act{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.dpop{margin-top:20px;border:1px solid var(--ink);padding:22px 24px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr) minmax(0,1.2fr) auto;gap:24px;align-items:end;animation:popIn .45s var(--ease) both}
+.dt-hero{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:80px;margin-top:40px;align-items:end}
+.dt-kicker{display:flex;gap:14px;align-items:baseline}
+.dt-title{font-family:var(--serif);font-weight:640;font-size:clamp(46px,6.4vw,100px);line-height:.95;letter-spacing:-.025em;margin:14px 0 0;text-wrap:balance}
+.dt-sub{margin:18px 0 26px;font-family:var(--serif);font-weight:500;font-size:20px;color:var(--ink2)}
+.dt-side{display:flex;flex-direction:column;gap:28px;min-width:0}
+.r52-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--mute)}
+.r52{position:relative;height:1px;background:var(--ink);margin:30px 0 12px}
+.r52::before,.r52::after{content:'';position:absolute;top:-5px;width:1px;height:11px;background:var(--ink)}
+.r52::before{left:0}.r52::after{right:0}
+.r52-m{position:absolute;top:-30px;display:flex;flex-direction:column;align-items:center;transform:translateX(-50%);transition:left .9s var(--ease)}
+.r52-m span{font-size:11px;color:var(--accentInk);white-space:nowrap;margin-bottom:6px}
+.r52-m i{width:9px;height:9px;background:var(--accent);border:1px solid var(--ink);display:block;margin-top:2px}
+.dchart-wrap{margin-top:64px}
+.dchart-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:26px}
+.dchart-head .delta-p{font-size:34px}
+.dchart{position:relative}
+.dhit{position:absolute;inset:0;cursor:crosshair}
+.dt-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:80px;margin-top:72px}
+.ctab{width:100%;border-collapse:collapse;margin-top:18px}
+.ctab td{padding:13px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.ctab td.r{text-align:right;font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:20px}
+.ctab tr:first-child td{border-top:1px solid var(--ink)}
+.ctabs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:32px}
+.views{margin-top:18px;border-top:1px solid var(--ink)}
+.view{width:100%;display:grid !important;grid-template-columns:64px minmax(0,1fr) auto 72px;gap:14px;align-items:center;min-height:52px;border-bottom:1px solid var(--line) !important;padding:0 4px !important;transition:background-color .3s var(--ease),padding .35s var(--ease)}
+.view:hover{background:var(--panel) !important;padding-left:12px !important}
+.view.on{background:var(--accentBg) !important}
+.view-code{font-family:var(--num);font-weight:720;font-stretch:115%;letter-spacing:.01em;font-size:18px}
+.view-name{color:var(--mute);font-size:12px}
+.view-val{font-family:var(--num);font-weight:620;font-stretch:112%;letter-spacing:-.035em;font-size:19px;font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
+.view-chg{text-align:right;font-size:12px}
+@media (max-width:1100px){
+  .dt-hero,.dt-grid{grid-template-columns:minmax(0,1fr);gap:48px}
+  .dpop{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+}
+@media (max-width:760px){
+  .mkts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mkt:nth-child(odd){padding-left:0;border-left:0}
+  .mkt:nth-child(n+3){border-top:1px solid var(--line)}
+  .dt-act{margin-left:0;width:100%}
+  .dpop{grid-template-columns:minmax(0,1fr)}
+  .ctabs{grid-template-columns:minmax(0,1fr)}
+  .toast{right:16px;bottom:16px}
+  .view{grid-template-columns:52px minmax(0,1fr) auto}
+  .view-chg{display:none}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .cx *,.cx *::before,.cx *::after{animation-duration:.01ms !important;animation-iteration-count:1 !important;transition-duration:.01ms !important}
+}
+</style>
+</helmet>
+<div class="cx {{themeCls}}">
+
+<header>
+  <div class="wrap">
+    <div class="top lbl">
+      <div class="top-l">
+        <span class="ed">Nº {{edition}}</span>
+        <span>{{longDate}}</span>
+      </div>
+      <div class="top-r">
+        <span class="live"><span class="dot" aria-hidden="true"></span>Ao vivo</span>
+        <span class="clock num">{{clock}}</span>
+        <button type="button" class="sq-btn" onClick="{{toggleTheme}}" aria-label="{{themeLabel}}">
+          <sc-if value="{{isDark}}" hint-placeholder-val="{{ false }}">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10zM12 1v3M12 20v3M1 12h3M20 12h3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"></path></svg>
+          </sc-if>
+          <sc-if value="{{isLight}}" hint-placeholder-val="{{ true }}">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"></path></svg>
+          </sc-if>
+        </button>
+      </div>
+    </div>
+    <div class="mast">
+      <h1 class="word" aria-label="Câmbio"><span class="l" style="animation-delay: 80ms">C</span><em class="l" style="animation-delay: 140ms">â</em><span class="l" style="animation-delay: 200ms">m</span><span class="l" style="animation-delay: 260ms">b</span><span class="l" style="animation-delay: 320ms">i</span><span class="l" style="animation-delay: 380ms">o</span><sup>FX</sup></h1>
+      <p class="tagline">As moedas do mundo, vistas de onde você está.</p>
+    </div>
+    <div class="rule" aria-hidden="true"></div>
+    <div class="mkts" aria-label="Horário dos mercados">
+      <sc-for list="{{markets}}" as="m" hint-placeholder-count="4">
+        <div class="mkt {{m.cls}}" style="animation-delay: {{m.delay}}">
+          <div class="mkt-top"><span class="mkt-city">{{m.city}}</span><span class="mkt-st {{m.cls}}"><span class="sq" aria-hidden="true"></span>{{m.status}}</span></div>
+          <div class="mkt-time num">{{m.time}} <span class="lbl">{{m.abbr}}</span></div>
+          <div class="mkt-bar" aria-hidden="true"><span class="mkt-sess" style="left: {{m.sL}}; width: {{m.sW}}"></span><span class="mkt-now" style="left: {{m.nowL}}"></span></div>
+          <div class="mkt-note">{{m.note}}</div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="ticker" aria-label="Cotações em tempo real">
+    <div class="track">
+      <sc-for list="{{ticker}}" as="t" hint-placeholder-count="12">
+        <span class="tk num"><b>{{t.pair}}</b><span class="v">{{t.val}}</span><span class="{{t.dir}}">{{t.chg}}</span></span>
+      </sc-for>
+    </div>
+  </div>
+</header>
+
+<main>
+<sc-if value="{{isHome}}" hint-placeholder-val="{{ true }}">
+<section class="pov" aria-label="Ponto de vista">
+  <div class="wrap">
+    <div class="sh"><span class="sh-n">01</span><span>Ponto de vista</span><span class="sh-r">Moeda base</span></div>
+    <div class="pov-in">
+      <div class="pov-pick">
+        <p class="sentence">Valores vistos a partir {{basePrep}} <button type="button" class="pick {{pickCls}}" onClick="{{toggleOpen}}" aria-expanded="{{open}}" aria-haspopup="true">{{baseName}}<span class="pick-code">{{baseTile}} · {{base}}</span><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5l5-5"></path></svg></button></p>
+        <sc-if value="{{open}}" hint-placeholder-val="{{ false }}">
+          <button type="button" class="backdrop" aria-label="Fechar seletor" onClick="{{closePanel}}"></button>
+          <div class="panel">
+            <div class="search">
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M10.5 18a7.5 7.5 0 1 1 0-15a7.5 7.5 0 0 1 0 15zM16 16l5 5"></path></svg>
+              <label class="sr" for="cx-q">Buscar moeda</label>
+              <input id="cx-q" type="search" autocomplete="off" placeholder="Buscar por nome ou código" value="{{query}}" onChange="{{onQuery}}">
+            </div>
+            <div class="opt-list">
+              <sc-for list="{{options}}" as="o" hint-placeholder-count="6">
+                <button type="button" class="opt" onClick="{{o.pick}}" aria-pressed="{{o.active}}">
+                  <span class="opt-sym" aria-hidden="true">{{o.tile}}</span>
+                  <span class="opt-code">{{o.code}}</span>
+                  <span class="opt-name">{{o.name}}</span>
+                  <sc-if value="{{o.active}}" hint-placeholder-val="{{ false }}">
+                    <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8l3.5 3.5L13 5"></path></svg>
+                  </sc-if>
+                </button>
+              </sc-for>
+              <sc-if value="{{noResults}}" hint-placeholder-val="{{ false }}">
+                <div class="empty">Nenhuma moeda encontrada.</div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-if>
+      </div>
+      <div class="quick">
+        <span class="lbl">Atalhos</span>
+        <div class="quick-row">
+          <sc-for list="{{chips}}" as="c" hint-placeholder-count="5">
+            <button type="button" class="qb {{c.cls}}" onClick="{{c.pick}}" aria-pressed="{{c.active}}">{{c.code}}</button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="feat" aria-label="Moeda em destaque">
+  <div class="wrap">
+    <div class="sh"><span class="sh-n">02</span><span>Em destaque</span><span class="sh-r">{{fCode}} / {{base}}</span></div>
+    <div class="feat-in">
+      <div class="feat-left">
+        <p class="lede">{{fLede}} vale hoje</p>
+        <div class="big {{fSize}}">
+          <span class="big-sym">{{baseSym}}</span>
+          <span class="big-num {{fFlash}}"><span class="sr">{{fVal}}</span><span class="odo {{rollCls}}" aria-hidden="true"><sc-for list="{{fSlots}}" as="s" hint-placeholder-count="6"><sc-if value="{{s.isD}}" hint-placeholder-val="{{ true }}"><span class="odo-col"><span class="odo-strip" style="transform: translateY({{s.y}}); transition-delay: {{s.delay}}"><sc-for list="{{s.digits}}" as="g" hint-placeholder-count="10"><span>{{g}}</span></sc-for></span></span></sc-if><sc-if value="{{s.isS}}" hint-placeholder-val="{{ false }}"><span class="odo-sep">{{s.ch}}</span></sc-if></sc-for></span></span>
+        </div>
+        <div class="delta">
+          <span class="delta-p {{fDir}}">{{fChg}}</span>
+          <span class="delta-s num">{{fDiff}} desde o fechamento</span>
+        </div>
+        <dl class="facts num">
+          <div><dt>Fechamento</dt><dd>{{fPrev}}</dd></div>
+          <div><dt>Inverso</dt><dd>{{fInv}}</dd></div>
+          <div><dt>Máx. 7d</dt><dd>{{fHi}}</dd></div>
+          <div><dt>Mín. 7d</dt><dd>{{fLo}}</dd></div>
+        </dl>
+        <button type="button" class="link-btn" onClick="{{fOpen}}">Página completa de {{fCode}} <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4l-4 4"></path></svg></button>
+      </div>
+      <div class="feat-right">
+        <div class="chart-head">
+          <span class="lbl">Sete sessões</span>
+          <span class="num {{fWkDir}}">7d {{fWk}}</span>
+        </div>
+        <div class="crop">
+          <i class="tl" aria-hidden="true"></i><i class="tr" aria-hidden="true"></i><i class="bl" aria-hidden="true"></i><i class="br" aria-hidden="true"></i>
+          <div class="chart" onMouseLeave="{{chartLeave}}">
+            <svg class="chart-svg" viewBox="0 0 640 260" aria-hidden="true">
+              <path class="gl" d="M0 24H640"></path>
+              <path class="gl" d="M0 130H640"></path>
+              <path class="gl" d="M0 236H640"></path>
+              <path class="ref" d="{{fRef}}"></path>
+              <path class="area {{drawCls}}" d="{{fArea}}"></path>
+              <path class="chart-line {{drawCls}}" d="{{fPath}}"></path>
+              <rect class="chart-dot" x="{{dotX}}" y="{{dotY}}" width="9" height="9"></rect>
+            </svg>
+            <span class="yl hi num">{{fHi}}</span>
+            <span class="yl lo num">{{fLo}}</span>
+            <sc-if value="{{hasHov}}" hint-placeholder-val="{{ false }}">
+              <span class="xh" style="left: {{hovLeft}}"></span>
+              <span class="tip {{tipCls}}" style="left: {{hovLeft}}; top: {{hovTop}}"><span>{{hovDate}}</span><strong class="num">{{hovVal}}</strong></span>
+            </sc-if>
+            <div class="hits" aria-hidden="true">
+              <sc-for list="{{hits}}" as="h" hint-placeholder-count="8"><span class="hit" onMouseEnter="{{h.enter}}"></span></sc-for>
+            </div>
+          </div>
+          <div class="axis num">
+            <sc-for list="{{days}}" as="d" hint-placeholder-count="8"><span>{{d.label}}</span></sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mk" aria-label="Principais moedas">
+  <div class="wrap">
+    <div class="sh"><span class="sh-n">03</span><span>Mercado</span><span class="sh-r">Valores em {{base}}</span></div>
+    <div class="mk-head">
+      <div>
+        <h2 class="h2">O mundo visto a partir {{basePrep}} <em>{{baseName}}</em></h2>
+        <p class="hint">Selecione uma moeda para colocá-la em destaque.</p>
+      </div>
+      <div class="seg" role="group" aria-label="Visualização">
+        <button type="button" class="seg-b {{gridCls}}" onClick="{{showGrid}}" aria-pressed="{{isGrid}}">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h5v5H2zM9 2h5v5H9zM2 9h5v5H2zM9 9h5v5H9z"></path></svg>Grade
+        </button>
+        <button type="button" class="seg-b {{listCls}}" onClick="{{showList}}" aria-pressed="{{isList}}">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 3.5h12M2 8h12M2 12.5h12"></path></svg>Lista
+        </button>
+        <button type="button" class="seg-b {{mxCls}}" onClick="{{showMatrix}}" aria-pressed="{{isMatrix}}">
+          <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 2h12v12H2zM2 6h12M2 10h12M6 2v12M10 2v12"></path></svg>Matriz
+        </button>
+      </div>
+    </div>
+
+    <sc-if value="{{isGrid}}" hint-placeholder-val="{{ true }}">
+      <div class="grid">
+        <sc-for list="{{cards}}" as="c" hint-placeholder-count="12">
+          <div class="card {{c.featCls}} {{c.pinCls}}" style="animation-delay: {{c.delay}}">
+            <button type="button" class="card-hit" onClick="{{c.feature}}" aria-pressed="{{c.isFeatured}}" aria-label="Destacar {{c.name}}"></button>
+            <span class="card-top num">
+              <span class="idx">{{c.idx}}</span>
+              <span class="tools">
+                <button type="button" class="tool {{c.pinOn}}" onClick="{{c.togglePin}}" aria-pressed="{{c.pinned}}" aria-label="Fixar {{c.code}} no topo"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2h6v4.5l2 3H3l2-3zM8 9.5V15"></path></svg></button>
+                <button type="button" class="tool {{c.bellOn}}" onClick="{{c.openAlert}}" aria-label="Alerta de preço para {{c.code}}"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 11.5V7a4.5 4.5 0 0 1 9 0v4.5l1.5 1.5H2zM6.5 15h3"></path></svg></button>
+              </span>
+              <span class="{{c.dir}}">{{c.chg}}</span>
+            </span>
+            <span class="card-id"><span class="card-code">{{c.code}}</span><span class="card-sym" aria-hidden="true">{{c.tile}}</span></span>
+            <span class="card-name">{{c.name}}</span>
+            <span class="val {{c.flash}}"><span class="val-sym">{{baseSym}}</span><span class="sr">{{c.val}}</span><span class="odo {{rollCls}}" aria-hidden="true"><sc-for list="{{c.slots}}" as="s" hint-placeholder-count="6"><sc-if value="{{s.isD}}" hint-placeholder-val="{{ true }}"><span class="odo-col"><span class="odo-strip" style="transform: translateY({{s.y}}); transition-delay: {{s.delay}}"><sc-for list="{{s.digits}}" as="g" hint-placeholder-count="10"><span>{{g}}</span></sc-for></span></span></sc-if><sc-if value="{{s.isS}}" hint-placeholder-val="{{ false }}"><span class="odo-sep">{{s.ch}}</span></sc-if></sc-for></span></span>
+            <sc-if value="{{c.hasAlert}}" hint-placeholder-val="{{ false }}">
+              <span class="alert-line {{c.alertCls}}"><span class="dm" aria-hidden="true"></span>{{c.alertText}}</span>
+            </sc-if>
+            <svg class="spark" viewBox="0 0 160 48" aria-hidden="true">
+              <path class="ref" d="{{c.ref}}"></path>
+              <path class="spark-line {{drawCls}} {{c.wkDir}}" style="animation-delay: {{c.sdelay}}" d="{{c.path}}"></path>
+              <rect class="spark-end" x="{{c.endX}}" y="{{c.endY}}" width="4" height="4"></rect>
+            </svg>
+            <span class="card-foot num"><span>7d {{c.wk}}</span><button type="button" class="more" onClick="{{c.open}}">Detalhes <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4l-4 4"></path></svg></button></span>
+            <sc-if value="{{c.alertOpen}}" hint-placeholder-val="{{ false }}">
+              <div class="pop">
+                <p class="pop-h">Avisar quando <em>{{c.code}}</em> ficar</p>
+                <div class="pop-seg" role="group" aria-label="Direção do alerta">
+                  <button type="button" class="{{aboveCls}}" onClick="{{draftAbove}}" aria-pressed="{{isAbove}}">Acima de</button>
+                  <button type="button" class="{{belowCls}}" onClick="{{draftBelow}}" aria-pressed="{{isBelow}}">Abaixo de</button>
+                </div>
+                <label class="sr" for="cx-alert">Valor-alvo em {{base}}</label>
+                <div class="pop-in"><span>{{baseSym}}</span><input id="cx-alert" type="text" inputmode="decimal" autocomplete="off" value="{{draftVal}}" onChange="{{onDraft}}"></div>
+                <div class="pop-act">
+                  <button type="button" class="btn pri" onClick="{{saveAlert}}">Salvar</button>
+                  <sc-if value="{{draftHasAlert}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn" onClick="{{removeAlert}}">Remover</button></sc-if>
+                  <button type="button" class="btn" onClick="{{cancelAlert}}">Cancelar</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isList}}" hint-placeholder-val="{{ false }}">
+      <div class="tbl-box">
+        <table class="tbl num">
+          <thead>
+            <tr><th>Moeda</th><th class="r">Valor em {{base}}</th><th class="r">Dia</th><th class="r">7 dias</th><th class="r">Tendência</th><th class="r">Inverso</th><th class="r"><span class="sr">Abrir</span></th></tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{cards}}" as="c" hint-placeholder-count="12">
+              <tr class="row" style="animation-delay: {{c.delay}}">
+                <td>
+                  <button type="button" class="row-btn" onClick="{{c.feature}}" aria-pressed="{{c.isFeatured}}">
+                    <span class="row-idx">{{c.idx}}</span>
+                    <span class="row-code">{{c.code}}</span>
+                    <span class="row-name">{{c.name}}</span>
+                  </button>
+                </td>
+                <td class="r"><span class="row-val {{c.flash}}">{{c.val}}</span></td>
+                <td class="r {{c.dir}}">{{c.chg}}</td>
+                <td class="r {{c.wkDir}}">{{c.wk}}</td>
+                <td class="r"><svg class="spark" viewBox="0 0 160 48" aria-hidden="true"><path class="ref" d="{{c.ref}}"></path><path class="spark-line {{drawCls}} {{c.wkDir}}" style="animation-delay: {{c.sdelay}}" d="{{c.path}}"></path></svg></td>
+                <td class="r" style="color: var(--mute)">{{c.inv}}</td>
+                <td class="r"><button type="button" class="more" onClick="{{c.open}}" aria-label="Abrir página de {{c.code}}">Abrir <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M2 8h11M9 4l4 4l-4 4"></path></svg></button></td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{isMatrix}}" hint-placeholder-val="{{ false }}">
+      <div class="mx-box">
+        <table class="mx">
+          <thead>
+            <tr><th class="c">1 unidade de ↓ em →</th><sc-for list="{{mxCols}}" as="h" hint-placeholder-count="8"><th class="{{h.cls}}">{{h.code}}</th></sc-for></tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{mxRows}}" as="r" hint-placeholder-count="8">
+              <tr class="{{r.cls}}">
+                <td class="rh">{{r.code}}</td>
+                <sc-for list="{{r.cells}}" as="x" hint-placeholder-count="8"><td class="{{x.cls}}">{{x.v}}</td></sc-for>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <div class="mx-legend"><span>Cor indica a variação do par no dia</span><span class="up">Alta acima de 0,05%</span><span class="dn">Queda abaixo de −0,05%</span></div>
+    </sc-if>
+  </div>
+</section>
+
+<section class="conv" aria-label="Conversor rápido">
+  <div class="wrap">
+    <div class="sh"><span class="sh-n">04</span><span>Conversor</span><span class="sh-r">Taxa do painel</span></div>
+    <div class="conv-in">
+      <div class="cf">
+        <label class="lbl" for="cx-amt">Você tem</label>
+        <div class="cf-line">
+          <input id="cx-amt" class="cf-in" type="text" inputmode="decimal" autocomplete="off" value="{{amount}}" onChange="{{onAmount}}">
+          <div class="sel">
+            <label class="sr" for="cx-from">Moeda de origem</label>
+            <select id="cx-from" value="{{convFrom}}" onChange="{{onFrom}}">
+              <sc-for list="{{convOpts}}" as="o" hint-placeholder-count="12"><option value="{{o.code}}">{{o.code}}</option></sc-for>
+            </select>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5l5-5"></path></svg>
+          </div>
+        </div>
+        <span class="cf-name">{{convFromName}}</span>
+      </div>
+      <button type="button" class="swap" onClick="{{swap}}" aria-label="Inverter moedas">
+        <svg class="ico ico-lg" style="transform: rotate({{swapDeg}}deg)" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h17l-4-4M21 16H4l4 4"></path></svg>
+      </button>
+      <div class="cf">
+        <span class="lbl">Você recebe</span>
+        <div class="cf-line">
+          <output class="cf-in cf-out" for="cx-amt cx-from cx-to">{{convResult}}</output>
+          <div class="sel">
+            <label class="sr" for="cx-to">Moeda de destino</label>
+            <select id="cx-to" value="{{convTo}}" onChange="{{onTo}}">
+              <sc-for list="{{convOpts}}" as="o" hint-placeholder-count="12"><option value="{{o.code}}">{{o.code}}</option></sc-for>
+            </select>
+            <svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 6l5 5l5-5"></path></svg>
+          </div>
+        </div>
+        <span class="cf-name">{{convToName}}</span>
+      </div>
+    </div>
+    <div class="conv-foot">
+      <div class="amts" role="group" aria-label="Valores rápidos">
+        <sc-for list="{{amts}}" as="a" hint-placeholder-count="4"><button type="button" class="amt num" onClick="{{a.set}}">{{a.label}}</button></sc-for>
+      </div>
+      <span class="rate num"><b>1 {{convFrom}} = {{convRate}} {{convTo}}</b> · 1 {{convTo}} = {{convInv}} {{convFrom}}</span>
+    </div>
+  </div>
+</section>
+</sc-if>
+
+<sc-if value="{{isDetail}}" hint-placeholder-val="{{ false }}">
+<section class="dt" aria-label="Detalhe da moeda">
+  <div class="wrap">
+    <nav class="dt-nav lbl" aria-label="Navegação">
+      <button type="button" class="back" onClick="{{goHome}}"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M14 8H3M7 4L3 8l4 4"></path></svg>Painel</button>
+      <span class="crumb">Painel / Moedas / <b>{{dCode}}</b></span>
+      <div class="dt-act">
+        <button type="button" class="btn {{dPinOn}}" onClick="{{dTogglePin}}" aria-pressed="{{dPinned}}"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2h6v4.5l2 3H3l2-3zM8 9.5V15"></path></svg>{{dPinLabel}}</button>
+        <button type="button" class="btn {{dBellOn}}" onClick="{{dOpenAlert}}"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 11.5V7a4.5 4.5 0 0 1 9 0v4.5l1.5 1.5H2zM6.5 15h3"></path></svg>{{dAlertLabel}}</button>
+      </div>
+    </nav>
+
+    <sc-if value="{{dAlertOpen}}" hint-placeholder-val="{{ false }}">
+      <div class="dpop">
+        <p class="pop-h">Avisar quando <em>{{dCode}}</em> ficar</p>
+        <div class="pop-seg" role="group" aria-label="Direção do alerta">
+          <button type="button" class="{{aboveCls}}" onClick="{{draftAbove}}" aria-pressed="{{isAbove}}">Acima de</button>
+          <button type="button" class="{{belowCls}}" onClick="{{draftBelow}}" aria-pressed="{{isBelow}}">Abaixo de</button>
+        </div>
+        <div>
+          <label class="sr" for="cx-alert-d">Valor-alvo em {{base}}</label>
+          <div class="pop-in"><span>{{baseSym}}</span><input id="cx-alert-d" type="text" inputmode="decimal" autocomplete="off" value="{{draftVal}}" onChange="{{onDraft}}"></div>
+        </div>
+        <div class="pop-act">
+          <button type="button" class="btn pri" onClick="{{saveAlert}}">Salvar</button>
+          <sc-if value="{{draftHasAlert}}" hint-placeholder-val="{{ false }}"><button type="button" class="btn" onClick="{{removeAlert}}">Remover</button></sc-if>
+          <button type="button" class="btn" onClick="{{cancelAlert}}">Cancelar</button>
+        </div>
+      </div>
+    </sc-if>
+
+    <div class="dt-hero">
+      <div>
+        <div class="sh"><span class="sh-n">{{dCode}}</span><span>{{dCode}} / {{base}}</span><span class="sh-r">{{dTile}}</span></div>
+        <h2 class="dt-title">{{dName}}</h2>
+        <p class="dt-sub">{{dLede}} vale hoje</p>
+        <div class="big {{dSize}}">
+          <span class="big-sym">{{baseSym}}</span>
+          <span class="big-num {{dFlash}}"><span class="sr">{{dVal}}</span><span class="odo {{rollCls}}" aria-hidden="true"><sc-for list="{{dSlots}}" as="s" hint-placeholder-count="6"><sc-if value="{{s.isD}}" hint-placeholder-val="{{ true }}"><span class="odo-col"><span class="odo-strip" style="transform: translateY({{s.y}}); transition-delay: {{s.delay}}"><sc-for list="{{s.digits}}" as="g" hint-placeholder-count="10"><span>{{g}}</span></sc-for></span></span></sc-if><sc-if value="{{s.isS}}" hint-placeholder-val="{{ false }}"><span class="odo-sep">{{s.ch}}</span></sc-if></sc-for></span></span>
+        </div>
+        <div class="delta" style="margin-top: 22px">
+          <span class="delta-p {{dDayDir}}">{{dDay}}</span>
+          <span class="delta-s num">no dia · {{dDiff}}</span>
+        </div>
+        <sc-if value="{{dHasAlert}}" hint-placeholder-val="{{ false }}">
+          <span class="alert-line {{dAlertCls}}" style="margin-top: 18px"><span class="dm" aria-hidden="true"></span>{{dAlertText}}</span>
+        </sc-if>
+      </div>
+      <div class="dt-side">
+        <div>
+          <span class="lbl">Faixa de 52 semanas</span>
+          <div class="r52"><span class="r52-m" style="left: {{r52Left}}"><span class="num">{{dValShort}}</span><i></i></span></div>
+          <div class="r52-labels num"><span>{{r52Lo}}</span><span>{{r52Hi}}</span></div>
+        </div>
+        <dl class="facts num">
+          <div><dt>Abertura do período</dt><dd>{{dOpen}}</dd></div>
+          <div><dt>Inverso</dt><dd>{{dInv}}</dd></div>
+          <div><dt>Máx. do período</dt><dd>{{dHi}}</dd></div>
+          <div><dt>Mín. do período</dt><dd>{{dLo}}</dd></div>
+          <div><dt>Volatilidade anual</dt><dd>{{dVolat}}</dd></div>
+          <div><dt>Variação 7d</dt><dd class="{{dWkDir}}">{{dWk}}</dd></div>
+        </dl>
+      </div>
+    </div>
+
+    <div class="dchart-wrap">
+      <div class="dchart-head">
+        <div>
+          <span class="lbl">Histórico · {{rangeLabel}}</span>
+          <div class="delta" style="margin-top: 10px"><span class="delta-p {{dRangeDir}}">{{dRangeChg}}</span><span class="delta-s">no período</span></div>
+        </div>
+        <div class="seg" role="group" aria-label="Período do gráfico">
+          <sc-for list="{{ranges}}" as="r" hint-placeholder-count="3"><button type="button" class="seg-b {{r.cls}}" onClick="{{r.pick}}" aria-pressed="{{r.on}}">{{r.label}}</button></sc-for>
+        </div>
+      </div>
+      <div class="crop">
+        <i class="tl" aria-hidden="true"></i><i class="tr" aria-hidden="true"></i><i class="bl" aria-hidden="true"></i><i class="br" aria-hidden="true"></i>
+        <div class="dchart">
+          <svg class="chart-svg" viewBox="0 0 1200 380" aria-hidden="true">
+            <path class="gl" d="M0 28H1200"></path>
+            <path class="gl" d="M0 190H1200"></path>
+            <path class="gl" d="M0 352H1200"></path>
+            <path class="ref" d="{{dRef}}"></path>
+            <path class="area {{drawCls}}" d="{{dArea}}"></path>
+            <path class="chart-line dline {{drawCls}}" d="{{dPath}}"></path>
+            <rect class="chart-dot" x="{{dDotX}}" y="{{dDotY}}" width="9" height="9"></rect>
+          </svg>
+          <span class="yl hi num">{{dHi}}</span>
+          <span class="yl lo num">{{dLo}}</span>
+          <sc-if value="{{dHasHov}}" hint-placeholder-val="{{ false }}">
+            <span class="xh" style="left: {{dHovLeft}}"></span>
+            <span class="tip {{dTipCls}}" style="left: {{dHovLeft}}; top: {{dHovTop}}"><span>{{dHovDate}}</span><strong class="num">{{dHovVal}}</strong></span>
+          </sc-if>
+          <div class="dhit" aria-hidden="true" onMouseMove="{{dMove}}" onMouseLeave="{{dLeave}}"></div>
+        </div>
+        <div class="axis num">
+          <sc-for list="{{dAxis}}" as="a" hint-placeholder-count="6"><span>{{a.label}}</span></sc-for>
+        </div>
+      </div>
+    </div>
+
+    <div class="dt-grid">
+      <div>
+        <div class="sh"><span class="sh-n">A</span><span>Conversões rápidas</span><span class="sh-r">{{dCode}} ⇄ {{base}}</span></div>
+        <div class="ctabs">
+          <table class="ctab num"><tbody>
+            <sc-for list="{{dConvTo}}" as="r" hint-placeholder-count="5"><tr><td>{{r.a}}</td><td class="r">{{r.v}}</td></tr></sc-for>
+          </tbody></table>
+          <table class="ctab num"><tbody>
+            <sc-for list="{{dConvBack}}" as="r" hint-placeholder-count="5"><tr><td>{{r.a}}</td><td class="r">{{r.v}}</td></tr></sc-for>
+          </tbody></table>
+        </div>
+      </div>
+      <div>
+        <div class="sh"><span class="sh-n">B</span><span>{{dCode}} visto de outras moedas</span><span class="sh-r">Toque para trocar a base</span></div>
+        <div class="views">
+          <sc-for list="{{dViews}}" as="v" hint-placeholder-count="7">
+            <button type="button" class="view {{v.cls}}" onClick="{{v.pick}}" aria-pressed="{{v.on}}">
+              <span class="view-code">{{v.code}}</span>
+              <span class="view-name">{{v.name}}</span>
+              <span class="view-val">{{v.val}}</span>
+              <span class="view-chg num {{v.dir}}">{{v.chg}}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+</sc-if>
+</main>
+
+<footer class="colo">
+  <div class="wrap colo-in">
+    <div>
+      <div class="colo-word">Câmbio</div>
+      <p>Cotações ilustrativas, criadas para este estudo de design. Não use para operações.</p>
+    </div>
+    <div>
+      <span class="lbl">Tipografia</span>
+      <p>Archivo em toda a interface, com pesos e larguras variáveis.</p>
+    </div>
+    <div>
+      <span class="lbl">Atualização</span>
+      <p class="num">A cada 3 segundos. Última às {{clock}}.</p>
+    </div>
+  </div>
+</footer>
+
+<sc-if value="{{hasToast}}" hint-placeholder-val="{{ false }}">
+  <div class="toast" role="status">
+    <span class="toast-mark" aria-hidden="true"></span>
+    <div class="toast-body"><span class="lbl">Alerta de preço</span><p>{{toastText}}</p></div>
+    <button type="button" class="toast-x" onClick="{{closeToast}}" aria-label="Fechar aviso"><svg class="ico" viewBox="0 0 16 16" aria-hidden="true"><path d="M3 3l10 10M13 3L3 13"></path></svg></button>
+  </div>
+</sc-if>
+<sc-if value="{{hasCurtain}}" hint-placeholder-val="{{ false }}">
+  <div class="curtain {{curtainCls}}" aria-hidden="true"></div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"theme":{"editor":"enum","options":["light","dark"],"default":"light"},"initialView":{"editor":null,"tsType":"string"},"initialOpen":{"editor":null,"tsType":"boolean"},"initialHover":{"editor":null,"tsType":"number"},"initialPage":{"editor":null,"tsType":"string"},"initialDetail":{"editor":null,"tsType":"string"},"initialAlertOpen":{"editor":null,"tsType":"string"},"initialToast":{"editor":null,"tsType":"boolean"},"$preview":{"width":1440,"height":2900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const D = this.data();
+    const today = {};
+    D.list.forEach((c) => { today[c.code] = c.rate; });
+    const hv = props.initialHover;
+    this.state = {
+      theme: null, base: 'BRL', featured: 'USD', booted: false,
+      open: !!props.initialOpen, query: '', view: props.initialView || 'grid',
+      hov: (hv !== undefined && hv !== null && hv !== '') ? Number(hv) : null,
+      page: props.initialPage === 'detail' ? 'detail' : 'home', detail: props.initialDetail || 'USD', range: '6M', dHov: null,
+      pins: ['USD', 'EUR'],
+      alerts: { USD: { base: 'BRL', dir: 'above', target: 5.425, fired: false }, GBP: { base: 'BRL', dir: 'below', target: 7.10, fired: false } },
+      alertOpen: props.initialAlertOpen || null, draft: { dir: 'above', val: '' },
+      toast: props.initialToast ? { text: 'USD/BRL passou de R$ 5,4300. Agora vale R$ 5,4318.' } : null,
+      curtain: null,
+      amount: '1.000', convFrom: 'USD', convTo: 'BRL', swapDeg: 0,
+      today: today, flash: null, drawN: 0, updated: Date.now()
+    };
+    if (props.initialAlertOpen) this.state.draft = { dir: 'above', val: this.fmt(today.BRL / today[props.initialAlertOpen] * 1.012) };
+    this.flashN = 0;
+    this.curN = 0;
+  }
+
+  componentDidMount() {
+    this.bt = setTimeout(() => this.setState({ booted: true }), 140);
+    this.iv = setInterval(() => this.tick(), 3200);
+  }
+
+  componentWillUnmount() {
+    [this.bt, this.ct1, this.ct2, this.tt].forEach((t) => clearTimeout(t));
+    clearInterval(this.iv);
+  }
+
+  rng(seed) {
+    let a = seed;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  hash(s) {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+    return h >>> 0;
+  }
+
+  data() {
+    if (this._d) return this._d;
+    // código, nome, símbolo, glifo, unidades por 1 USD, volatilidade diária, tendência, feminino
+    const raw = [
+      ['USD', 'Dólar americano', 'US$', '$', 1, 0, 0, 0],
+      ['BRL', 'Real brasileiro', 'R$', 'R$', 5.4200, 0.0045, 0, 0],
+      ['EUR', 'Euro', '€', '€', 0.8615, 0.003, 0, 0],
+      ['GBP', 'Libra esterlina', '£', '£', 0.7582, 0.0032, 0, 1],
+      ['JPY', 'Iene japonês', '¥', '¥', 151.84, 0.004, 0, 0],
+      ['CHF', 'Franco suíço', 'Fr', 'Fr', 0.8027, 0.003, 0, 0],
+      ['CAD', 'Dólar canadense', 'C$', 'C$', 1.3984, 0.0025, 0, 0],
+      ['AUD', 'Dólar australiano', 'A$', 'A$', 1.5318, 0.0038, 0, 0],
+      ['CNY', 'Yuan chinês', 'CN¥', '元', 7.1240, 0.0012, 0, 0],
+      ['ARS', 'Peso argentino', 'AR$', '$', 1418.50, 0.0035, 0.0018, 0],
+      ['MXN', 'Peso mexicano', 'MX$', '$', 18.352, 0.0048, 0, 0],
+      ['BTC', 'Bitcoin', '₿', '₿', 1 / 94820, 0.022, 0, 0],
+      ['KRW', 'Won sul-coreano', '₩', '₩', 1392.40, 0.004, 0, 0],
+      ['INR', 'Rupia indiana', '₹', '₹', 84.62, 0.0015, 0, 1],
+      ['SEK', 'Coroa sueca', 'kr', 'kr', 9.412, 0.004, 0, 1],
+      ['NOK', 'Coroa norueguesa', 'kr', 'kr', 10.86, 0.0042, 0, 1],
+      ['ZAR', 'Rand sul-africano', 'R', 'R', 17.84, 0.005, 0, 0],
+      ['SGD', 'Dólar de Singapura', 'S$', 'S$', 1.3065, 0.002, 0, 0],
+      ['HKD', 'Dólar de Hong Kong', 'HK$', 'HK$', 7.7810, 0.0004, 0, 0],
+      ['NZD', 'Dólar neozelandês', 'NZ$', 'NZ$', 1.6982, 0.004, 0, 0],
+      ['CLP', 'Peso chileno', 'CLP$', '$', 935.20, 0.0045, 0, 0],
+      ['COP', 'Peso colombiano', 'COL$', '$', 4012.0, 0.0048, 0, 0]
+    ];
+    const list = raw.map((r) => ({ code: r[0], name: r[1], sym: r[2], tile: r[3], rate: r[4], vol: r[5], drift: r[6], fem: !!r[7] }));
+    const by = {}, H = {}, L = {};
+    list.forEach((c) => {
+      by[c.code] = c;
+      const rnd = this.rng(this.hash(c.code + 'fx'));
+      const a = new Array(8);
+      a[7] = c.rate;
+      for (let i = 6; i >= 0; i--) a[i] = a[i + 1] / (1 + c.drift + (rnd() - 0.5) * 2 * c.vol);
+      H[c.code] = a;
+    });
+    H.BRL[6] = H.BRL[7] / 1.0032;
+    list.forEach((c) => {
+      // 366 dias: os 8 últimos são a série de 7 dias
+      const rnd = this.rng(this.hash(c.code + 'longo'));
+      const ph = rnd() * 40;
+      const l = new Array(366);
+      for (let k = 0; k < 8; k++) l[358 + k] = H[c.code][k];
+      for (let i = 357; i >= 0; i--) {
+        const wave = c.vol * 0.3 * Math.sin((i + ph) / 26);
+        l[i] = l[i + 1] / (1 + c.drift * 0.9 + wave + (rnd() - 0.5) * 2 * c.vol * 0.9);
+      }
+      L[c.code] = l;
+    });
+    this._d = {
+      list: list, by: by, H: H, L: L,
+      grid: ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CAD', 'AUD', 'CNY', 'ARS', 'MXN', 'BTC', 'BRL'],
+      quick: ['BRL', 'USD', 'EUR', 'GBP', 'JPY'],
+      matrix: ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'CNY', 'CAD', 'BRL'],
+      views: ['USD', 'EUR', 'GBP', 'JPY', 'CHF', 'BRL', 'CNY', 'ARS'],
+      markets: [
+        { city: 'Tóquio', tz: 'Asia/Tokyo', abbr: 'JST', o: 9, c: 15 },
+        { city: 'Londres', tz: 'Europe/London', abbr: 'GMT', o: 8, c: 16.5 },
+        { city: 'Nova York', tz: 'America/New_York', abbr: 'ET', o: 9.5, c: 16 },
+        { city: 'São Paulo', tz: 'America/Sao_Paulo', abbr: 'BRT', o: 10, c: 17 }
+      ],
+      DIG: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+    };
+    this._nf = {};
+    return this._d;
+  }
+
+  nf(d) {
+    if (!this._nf) this._nf = {};
+    if (!this._nf[d]) this._nf[d] = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: d, maximumFractionDigits: d });
+    return this._nf[d];
+  }
+
+  fmt(v) {
+    const a = Math.abs(v);
+    const d = a >= 100 ? 2 : a >= 0.01 ? 4 : a >= 0.0001 ? 6 : 8;
+    return this.nf(d).format(v);
+  }
+
+  money(v) { return Math.abs(v) >= 1 ? this.nf(2).format(v) : this.fmt(v); }
+
+  fmtSigned(v) { return (v > 0 ? '+' : v < 0 ? '−' : '') + this.fmt(Math.abs(v)); }
+
+  pct(p) {
+    const x = p * 100;
+    if (Math.abs(x) < 0.005) return '0,00%';
+    return (x > 0 ? '+' : '−') + this.nf(2).format(Math.abs(x)) + '%';
+  }
+
+  dir(p) { return p > 0.00005 ? 'up' : p < -0.00005 ? 'dn' : ''; }
+
+  slots(str, n) {
+    const D = this.data(), booted = this.state.booted, out = [];
+    for (let k = 0; k < n; k++) {
+      const idx = str.length - n + k;
+      const ch = idx >= 0 ? str.charAt(idx) : '';
+      const isD = ch >= '0' && ch <= '9';
+      out.push({
+        isD: isD, isS: ch !== '' && !isD, ch: ch, digits: D.DIG,
+        y: (isD && booted ? -Number(ch) * 1.1 : 0).toFixed(2) + 'em',
+        delay: ((n - 1 - k) * 35) + 'ms'
+      });
+    }
+    return out;
+  }
+
+  series(x, b) {
+    const H = this.data().H, T = this.state.today, out = [];
+    for (let i = 0; i < 8; i++) {
+      const rb = i === 7 ? T[b] : H[b][i];
+      const rx = i === 7 ? T[x] : H[x][i];
+      out.push(rb / rx);
+    }
+    return out;
+  }
+
+  seriesLong(x, b, n) {
+    const L = this.data().L, T = this.state.today, out = [];
+    for (let i = 0; i < n; i++) {
+      const k = 366 - n + i;
+      const rb = k === 365 ? T[b] : L[b][k];
+      const rx = k === 365 ? T[x] : L[x][k];
+      out.push(rb / rx);
+    }
+    return out;
+  }
+
+  scale(s, w, h, pad) {
+    let mn = Math.min.apply(null, s), mx = Math.max.apply(null, s);
+    if (mx - mn < mx * 1e-9) { mx = mx * (1 + 1e-6); mn = mn * (1 - 1e-6); }
+    const step = w / (s.length - 1);
+    const y = (v) => pad + (1 - (v - mn) / (mx - mn)) * (h - 2 * pad);
+    return { pts: s.map((v, i) => [i * step, y(v)]), y: y };
+  }
+
+  d(p) { return p.map((q, i) => (i ? 'L' : 'M') + q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' '); }
+
+  parseAmt(s) {
+    const n = Number(String(s).replace(/\s/g, '').replace(/\./g, '').replace(',', '.'));
+    return isFinite(n) ? n : 0;
+  }
+
+  toTop() {
+    try { window.scrollTo({ top: 0, behavior: 'smooth' }); } catch (e) { /* sem rolagem */ }
+  }
+
+  go(page, code) {
+    clearTimeout(this.bt);
+    const st = { page: page, booted: false, drawN: this.state.drawN + 1, dHov: null, hov: null, alertOpen: null, open: false };
+    if (code) st.detail = code;
+    this.setState(st);
+    this.bt = setTimeout(() => this.setState({ booted: true }), 90);
+    this.toTop();
+  }
+
+  pickBase(code) {
+    if (code === this.state.base) { this.setState({ open: false, query: '' }); return; }
+    this.setState({ base: code, drawN: this.state.drawN + 1, open: false, query: '', hov: null, dHov: null, alertOpen: null });
+  }
+
+  flipTheme(cur) {
+    const to = cur === 'dark' ? 'light' : 'dark';
+    this.curN++;
+    clearTimeout(this.ct1); clearTimeout(this.ct2);
+    this.setState({ curtain: { cls: (this.curN % 2 ? 'cur-a' : 'cur-b') + ' to-' + to } });
+    this.ct1 = setTimeout(() => this.setState({ theme: to }), 400);
+    this.ct2 = setTimeout(() => this.setState({ curtain: null }), 980);
+  }
+
+  togglePin(code) {
+    const p = this.state.pins.slice();
+    const i = p.indexOf(code);
+    if (i >= 0) p.splice(i, 1); else p.push(code);
+    this.setState({ pins: p });
+  }
+
+  openAlert(code) {
+    const S = this.state, a = S.alerts[code];
+    const cur = S.today[S.base] / S.today[code];
+    const has = a && a.base === S.base;
+    this.setState({ alertOpen: code, draft: { dir: has ? a.dir : 'above', val: this.fmt(has ? a.target : cur * 1.01) } });
+  }
+
+  saveAlert() {
+    const S = this.state, code = S.alertOpen;
+    const target = this.parseAmt(S.draft.val);
+    if (!code || !(target > 0)) { this.setState({ alertOpen: null }); return; }
+    const alerts = Object.assign({}, S.alerts);
+    alerts[code] = { base: S.base, dir: S.draft.dir, target: target, fired: false };
+    this.setState({ alerts: alerts, alertOpen: null });
+  }
+
+  removeAlert() {
+    const alerts = Object.assign({}, this.state.alerts);
+    delete alerts[this.state.alertOpen];
+    this.setState({ alerts: alerts, alertOpen: null });
+  }
+
+  alertInfo(code) {
+    const S = this.state, a = S.alerts[code];
+    if (!a || a.base !== S.base) return null;
+    const v = S.today[a.base] / S.today[code];
+    const word = a.dir === 'above' ? 'acima de' : 'abaixo de';
+    const sym = this.data().by[a.base].sym;
+    if (a.fired) return { cls: 'fired', text: 'Alerta disparado · ' + word + ' ' + sym + ' ' + this.fmt(a.target) };
+    const dist = Math.abs(a.target / v - 1) * 100;
+    return { cls: '', text: 'Alerta ' + word + ' ' + this.fmt(a.target) + ' · faltam ' + this.nf(2).format(dist) + '%' };
+  }
+
+  tick() {
+    const D = this.data(), S = this.state;
+    const pool = D.grid.filter((c) => c !== 'USD');
+    const code = pool[Math.floor(Math.random() * pool.length)];
+    const mag = code === 'BTC' ? 0.004 : 0.0009;
+    const f = 1 + (Math.random() - 0.5) * 2 * mag;
+    const today = Object.assign({}, S.today);
+    today[code] = S.today[code] * f;
+    // se a própria base oscilou, todos os valores mudam: destaca o par com o dólar
+    const isBase = code === S.base;
+    const up = isBase ? f > 1 : f < 1;
+    const flashCode = isBase ? 'USD' : code;
+    this.flashN++;
+    const st = { today: today, updated: Date.now(), flash: { code: flashCode, cls: (up ? 'fl-up' : 'fl-dn') + (this.flashN % 2 ? '-a' : '-b') } };
+    let alerts = null, toast = null;
+    Object.keys(S.alerts).forEach((k) => {
+      const a = S.alerts[k];
+      if (a.fired) return;
+      const v = today[a.base] / today[k];
+      if ((a.dir === 'above' && v >= a.target) || (a.dir === 'below' && v <= a.target)) {
+        alerts = alerts || Object.assign({}, S.alerts);
+        alerts[k] = Object.assign({}, a, { fired: true });
+        const sym = D.by[a.base].sym;
+        toast = { text: k + '/' + a.base + (a.dir === 'above' ? ' passou de ' : ' caiu abaixo de ') + sym + ' ' + this.fmt(a.target) + '. Agora vale ' + sym + ' ' + this.fmt(v) + '.' };
+      }
+    });
+    if (alerts) { st.alerts = alerts; st.toast = toast; clearTimeout(this.tt); this.tt = setTimeout(() => this.setState({ toast: null }), 8000); }
+    this.setState(st);
+  }
+
+  markets(now) {
+    const D = this.data(), out = [];
+    const WD = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 };
+    const dur = (h) => { const m = Math.round(h * 60); return Math.floor(m / 60) + 'h' + String(m % 60).padStart(2, '0'); };
+    const hm = (h) => String(Math.floor(h)).padStart(2, '0') + ':' + String(Math.round((h % 1) * 60)).padStart(2, '0');
+    D.markets.forEach((m, i) => {
+      let wd = 3, h = 12, mi = 0;
+      try {
+        const parts = new Intl.DateTimeFormat('en-US', { timeZone: m.tz, hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit' }).formatToParts(now);
+        const g = (t) => (parts.find((p) => p.type === t) || {}).value;
+        wd = WD[g('weekday')]; h = Number(g('hour')) % 24; mi = Number(g('minute'));
+      } catch (e) { /* fuso indisponível */ }
+      const t = h + mi / 60;
+      const weekday = wd >= 1 && wd <= 5;
+      const isOpen = weekday && t >= m.o && t < m.c;
+      let note;
+      if (isOpen) note = 'Fecha em ' + dur(m.c - t);
+      else if (weekday && t < m.o) note = 'Abre em ' + dur(m.o - t);
+      else if (wd === 5 || wd === 6) note = 'Abre segunda às ' + hm(m.o);
+      else note = 'Abre amanhã às ' + hm(m.o);
+      out.push({
+        city: m.city, abbr: m.abbr,
+        time: String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0'),
+        status: isOpen ? 'Aberto' : 'Fechado', cls: isOpen ? 'on' : '',
+        sL: (m.o / 24 * 100).toFixed(2) + '%', sW: ((m.c - m.o) / 24 * 100).toFixed(2) + '%',
+        nowL: (t / 24 * 100).toFixed(2) + '%', note: note, delay: (500 + i * 90) + 'ms'
+      });
+    });
+    return out;
+  }
+
+  renderVals() {
+    const D = this.data(), S = this.state, T = S.today;
+    const theme = S.theme || this.props.theme || 'light';
+    const base = S.base, B = D.by[base];
+    const val = (x, b) => T[b] / T[x];
+    const drawCls = S.drawN % 2 ? 'draw-b' : 'draw-a';
+    const rollCls = S.drawN % 2 ? 'roll-b' : 'roll-a';
+    const featured = S.featured === base ? (base === 'USD' ? 'EUR' : 'USD') : S.featured;
+    const flash = S.flash;
+    const MES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    const MESL = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+    const DIA = ['Domingo', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado'];
+    const p2 = (n) => String(n).padStart(2, '0');
+    const now = new Date(S.updated);
+    const start = new Date(now.getFullYear(), 0, 0);
+    const edition = Math.floor((now - start) / 864e5);
+    const lede = (c) => (c.fem ? 'Uma ' : 'Um ') + c.name.charAt(0).toLowerCase() + c.name.slice(1);
+
+    // ----- cards (fixadas primeiro) -----
+    const others = D.grid.filter((c) => c !== base);
+    const ordered = others.filter((c) => S.pins.indexOf(c) >= 0).concat(others.filter((c) => S.pins.indexOf(c) < 0));
+    const cards = ordered.map((code, i) => {
+      const c = D.by[code];
+      const s = this.series(code, base);
+      const ch = s[7] / s[6] - 1, wk = s[7] / s[0] - 1;
+      const sc = this.scale(s, 156, 48, 5);
+      const end = sc.pts[7];
+      const v = this.fmt(val(code, base));
+      const pinned = S.pins.indexOf(code) >= 0;
+      const al = this.alertInfo(code);
+      return {
+        code: code, name: c.name, tile: c.tile, idx: p2(i + 1),
+        val: v, slots: this.slots(v, 15),
+        chg: this.pct(ch), dir: this.dir(ch), wk: this.pct(wk), wkDir: this.dir(wk),
+        path: this.d(sc.pts), ref: 'M0 ' + sc.y(s[6]).toFixed(2) + ' H160',
+        endX: (end[0] - 2).toFixed(2), endY: (end[1] - 2).toFixed(2),
+        inv: this.fmt(1 / val(code, base)),
+        delay: (i * 60) + 'ms', sdelay: (240 + i * 60) + 'ms',
+        flash: flash && flash.code === code ? flash.cls : '',
+        isFeatured: code === featured, featCls: code === featured ? 'feat-on' : '',
+        pinned: pinned, pinCls: pinned ? 'pinned' : '', pinOn: pinned ? 'on' : '',
+        hasAlert: !!al, alertCls: al ? al.cls : '', alertText: al ? al.text : '',
+        bellOn: S.alerts[code] && S.alerts[code].base === base ? 'on' : '',
+        alertOpen: S.alertOpen === code && S.page === 'home',
+        feature: () => this.setState({ featured: code, hov: null }),
+        togglePin: () => this.togglePin(code),
+        openAlert: () => this.openAlert(code),
+        open: () => this.go('detail', code)
+      };
+    });
+
+    const ticker0 = cards.map((c) => ({ pair: c.code + '/' + base, val: c.val, chg: c.chg, dir: c.dir }));
+
+    // ----- destaque -----
+    const F = D.by[featured];
+    const fs = this.series(featured, base);
+    const fch = fs[7] / fs[6] - 1, fwk = fs[7] / fs[0] - 1;
+    const fsc = this.scale(fs, 624, 260, 24);
+    const fp = fsc.pts;
+    const fPath = this.d(fp);
+    const fValStr = this.fmt(val(featured, base));
+    const days = [];
+    for (let i = 7; i >= 0; i--) {
+      const dt = new Date(now.getTime() - i * 864e5);
+      days.push({ label: i === 0 ? 'Hoje' : p2(dt.getDate()) + ' ' + MES[dt.getMonth()] });
+    }
+    const hi = S.hov === null ? 7 : Math.max(0, Math.min(7, S.hov));
+
+    // ----- seletor -----
+    const q = S.query.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+    const options = D.list.filter((c) => !q || (c.code + ' ' + c.name).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').indexOf(q) >= 0)
+      .map((c) => ({ code: c.code, name: c.name, tile: c.tile, active: c.code === base, pick: () => this.pickBase(c.code) }));
+
+    // ----- matriz -----
+    const mx = D.matrix.slice();
+    if (mx.indexOf(base) < 0) mx[mx.length - 1] = base;
+    const H = D.H;
+    const mxRows = mx.map((r) => ({
+      code: r, cls: r === base ? 'base' : '',
+      cells: mx.map((c) => {
+        if (c === r) return { v: '—', cls: 'diag' + (c === base ? ' base' : '') };
+        const v = T[c] / T[r], prev = H[c][6] / H[r][6], p = v / prev - 1;
+        return { v: this.fmt(v), cls: (p > 0.0005 ? 's-up' : p < -0.0005 ? 's-dn' : '') + (c === base ? ' base' : '') };
+      })
+    }));
+
+    // ----- conversor -----
+    const amt = this.parseAmt(S.amount);
+    const cRate = T[S.convTo] / T[S.convFrom];
+
+    // ----- detalhe -----
+    let X = S.detail;
+    if (X === base) X = base === 'USD' ? 'EUR' : 'USD';
+    const XC = D.by[X];
+    const RN = { '1M': 31, '6M': 183, '1A': 366 };
+    const RL = { '1M': '1 mês', '6M': '6 meses', '1A': '1 ano' };
+    const n = RN[S.range];
+    const ds = this.seriesLong(X, base, n);
+    const year = this.seriesLong(X, base, 366);
+    const dsc = this.scale(ds, 1176, 380, 30);
+    const dp = dsc.pts;
+    const dPath = this.d(dp);
+    const dv = val(X, base);
+    const dValStr = this.fmt(dv);
+    const d7 = this.series(X, base);
+    const dDay = d7[7] / d7[6] - 1, dWk = d7[7] / d7[0] - 1;
+    const yMin = Math.min.apply(null, year), yMax = Math.max.apply(null, year);
+    let sum = 0, sum2 = 0;
+    for (let i = 1; i < year.length; i++) { const r = Math.log(year[i] / year[i - 1]); sum += r; sum2 += r * r; }
+    const m1 = sum / (year.length - 1);
+    const volat = Math.sqrt(Math.max(0, sum2 / (year.length - 1) - m1 * m1)) * Math.sqrt(365);
+    const dh = S.dHov === null ? n - 1 : Math.max(0, Math.min(n - 1, S.dHov));
+    const dateAt = (i, cnt) => new Date(now.getTime() - (cnt - 1 - i) * 864e5);
+    const dAxis = [];
+    for (let k = 0; k < 6; k++) {
+      const i = Math.round(k * (n - 1) / 5);
+      const dt = dateAt(i, n);
+      dAxis.push({ label: k === 5 ? 'Hoje' : (S.range === '1A' ? MES[dt.getMonth()] + ' ' + String(dt.getFullYear()).slice(2) : p2(dt.getDate()) + ' ' + MES[dt.getMonth()]) });
+    }
+    const hovDt = dateAt(dh, n);
+    const al = this.alertInfo(X);
+    const amts = [1, 10, 100, 1000, 10000];
+    const dAlert = S.alerts[X] && S.alerts[X].base === base;
+
+    return {
+      themeCls: theme === 'dark' ? 'dark' : '', isDark: theme === 'dark', isLight: theme !== 'dark',
+      themeLabel: theme === 'dark' ? 'Ativar modo claro' : 'Ativar modo escuro',
+      toggleTheme: () => this.flipTheme(theme),
+      hasCurtain: !!S.curtain, curtainCls: S.curtain ? S.curtain.cls : '',
+      edition: edition,
+      longDate: DIA[now.getDay()] + ', ' + now.getDate() + ' de ' + MESL[now.getMonth()] + ' de ' + now.getFullYear(),
+      clock: p2(now.getHours()) + ':' + p2(now.getMinutes()) + ':' + p2(now.getSeconds()),
+      ticker: ticker0.concat(ticker0),
+      markets: this.markets(now),
+      rollCls: rollCls, drawCls: drawCls,
+      isHome: S.page === 'home', isDetail: S.page === 'detail',
+      goHome: () => this.go('home'),
+
+      hasToast: !!S.toast, toastText: S.toast ? S.toast.text : '',
+      closeToast: () => this.setState({ toast: null }),
+
+      base: base, baseName: B.name, baseTile: B.tile, baseSym: B.sym, basePrep: B.fem ? 'da' : 'do',
+      open: S.open, pickCls: S.open ? 'open' : '', query: S.query,
+      toggleOpen: () => this.setState({ open: !S.open, query: '' }),
+      closePanel: () => this.setState({ open: false, query: '' }),
+      onQuery: (ev) => this.setState({ query: ev.target.value }),
+      options: options, noResults: options.length === 0,
+      chips: D.quick.map((c) => ({ code: c, active: c === base, cls: c === base ? 'on' : '', pick: () => this.pickBase(c) })),
+
+      fCode: featured, fLede: lede(F), fVal: fValStr, fSlots: this.slots(fValStr, 15),
+      fSize: fValStr.length <= 7 ? 'xl' : fValStr.length <= 11 ? 'lg' : 'md',
+      fFlash: flash && flash.code === featured ? flash.cls : '',
+      fChg: this.pct(fch), fDir: this.dir(fch),
+      fDiff: this.fmtSigned(fs[7] - fs[6]), fInv: this.fmt(1 / val(featured, base)) + ' ' + featured,
+      fPrev: this.fmt(fs[6]), fHi: this.fmt(Math.max.apply(null, fs)), fLo: this.fmt(Math.min.apply(null, fs)),
+      fWk: this.pct(fwk), fWkDir: this.dir(fwk),
+      fPath: fPath, fArea: fPath + ' L624 260 L0 260 Z', fRef: 'M0 ' + fsc.y(fs[6]).toFixed(2) + ' H640',
+      fOpen: () => this.go('detail', featured),
+      dotX: (fp[hi][0] - 4.5).toFixed(2), dotY: (fp[hi][1] - 4.5).toFixed(2),
+      hasHov: S.hov !== null,
+      hovLeft: (fp[hi][0] / 640 * 100).toFixed(3) + '%', hovTop: (fp[hi][1] / 260 * 100).toFixed(3) + '%',
+      tipCls: hi >= 5 ? 'r' : '', hovDate: days[hi].label, hovVal: this.fmt(fs[hi]),
+      hits: days.map((d, i) => ({ enter: () => this.setState({ hov: i }) })),
+      chartLeave: () => this.setState({ hov: null }),
+      days: days,
+
+      cards: cards,
+      isGrid: S.view === 'grid', isList: S.view === 'list', isMatrix: S.view === 'matrix',
+      gridCls: S.view === 'grid' ? 'on' : '', listCls: S.view === 'list' ? 'on' : '', mxCls: S.view === 'matrix' ? 'on' : '',
+      showGrid: () => this.setState({ view: 'grid' }),
+      showList: () => this.setState({ view: 'list' }),
+      showMatrix: () => this.setState({ view: 'matrix' }),
+      mxRows: mxRows, mxCols: mx.map((c) => ({ code: c, cls: c === base ? 'base' : '' })),
+
+      // alertas (formulário compartilhado)
+      aboveCls: S.draft.dir === 'above' ? 'on' : '', belowCls: S.draft.dir === 'below' ? 'on' : '',
+      isAbove: S.draft.dir === 'above', isBelow: S.draft.dir === 'below',
+      draftVal: S.draft.val, draftHasAlert: !!(S.alertOpen && S.alerts[S.alertOpen] && S.alerts[S.alertOpen].base === base),
+      draftAbove: () => this.setState({ draft: Object.assign({}, S.draft, { dir: 'above' }) }),
+      draftBelow: () => this.setState({ draft: Object.assign({}, S.draft, { dir: 'below' }) }),
+      onDraft: (ev) => this.setState({ draft: Object.assign({}, S.draft, { val: ev.target.value.replace(/[^0-9.,]/g, '') }) }),
+      saveAlert: () => this.saveAlert(), removeAlert: () => this.removeAlert(),
+      cancelAlert: () => this.setState({ alertOpen: null }),
+
+      amount: S.amount, convFrom: S.convFrom, convTo: S.convTo,
+      convOpts: D.list.map((c) => ({ code: c.code })),
+      onAmount: (ev) => this.setState({ amount: ev.target.value.replace(/[^0-9.,]/g, '') }),
+      onFrom: (ev) => this.setState({ convFrom: ev.target.value }),
+      onTo: (ev) => this.setState({ convTo: ev.target.value }),
+      swap: () => this.setState({ convFrom: S.convTo, convTo: S.convFrom, swapDeg: S.swapDeg + 180 }),
+      swapDeg: S.swapDeg,
+      amts: ['100', '1.000', '10.000', '100.000'].map((a) => ({ label: a, set: () => this.setState({ amount: a }) })),
+      convResult: D.by[S.convTo].sym + ' ' + this.money(amt * cRate),
+      convFromName: D.by[S.convFrom].name, convToName: D.by[S.convTo].name,
+      convRate: this.fmt(cRate), convInv: this.fmt(1 / cRate),
+
+      // ----- detalhe -----
+      dCode: X, dName: XC.name, dTile: XC.tile, dLede: lede(XC),
+      dVal: dValStr, dSlots: this.slots(dValStr, 15), dValShort: this.fmt(dv),
+      dSize: dValStr.length <= 7 ? 'xl' : dValStr.length <= 11 ? 'lg' : 'md',
+      dFlash: flash && flash.code === X ? flash.cls : '',
+      dDay: this.pct(dDay), dDayDir: this.dir(dDay), dDiff: this.fmtSigned(d7[7] - d7[6]),
+      dWk: this.pct(dWk), dWkDir: this.dir(dWk),
+      dInv: this.fmt(1 / dv) + ' ' + X,
+      dOpen: this.fmt(ds[0]), dHi: this.fmt(Math.max.apply(null, ds)), dLo: this.fmt(Math.min.apply(null, ds)),
+      dVolat: this.nf(1).format(volat * 100) + '%',
+      r52Lo: this.fmt(yMin), r52Hi: this.fmt(yMax),
+      r52Left: (Math.max(0, Math.min(1, (dv - yMin) / (yMax - yMin))) * 100).toFixed(2) + '%',
+      dRangeChg: this.pct(ds[n - 1] / ds[0] - 1), dRangeDir: this.dir(ds[n - 1] / ds[0] - 1), rangeLabel: RL[S.range],
+      ranges: ['1M', '6M', '1A'].map((r) => ({ label: r, on: r === S.range, cls: r === S.range ? 'on' : '', pick: () => this.setState({ range: r, dHov: null, drawN: S.drawN + 1 }) })),
+      dPath: dPath, dArea: dPath + ' L1176 380 L0 380 Z', dRef: 'M0 ' + dsc.y(ds[0]).toFixed(2) + ' H1200',
+      dDotX: (dp[dh][0] - 4.5).toFixed(2), dDotY: (dp[dh][1] - 4.5).toFixed(2),
+      dHasHov: S.dHov !== null,
+      dHovLeft: (dp[dh][0] / 1200 * 100).toFixed(3) + '%', dHovTop: (dp[dh][1] / 380 * 100).toFixed(3) + '%',
+      dTipCls: dh > n * 0.66 ? 'r' : '',
+      dHovDate: p2(hovDt.getDate()) + ' ' + MES[hovDt.getMonth()] + ' ' + hovDt.getFullYear(), dHovVal: this.fmt(ds[dh]),
+      dMove: (ev) => {
+        const r = ev.currentTarget.getBoundingClientRect();
+        const x = Math.max(0, Math.min(1, (ev.clientX - r.left) / (r.width * 0.98)));
+        const i = Math.round(x * (n - 1));
+        if (i !== this.state.dHov) this.setState({ dHov: i });
+      },
+      dLeave: () => this.setState({ dHov: null }),
+      dAxis: dAxis,
+      dPinned: S.pins.indexOf(X) >= 0, dPinOn: S.pins.indexOf(X) >= 0 ? 'on' : '',
+      dPinLabel: S.pins.indexOf(X) >= 0 ? 'Fixada' : 'Fixar',
+      dTogglePin: () => this.togglePin(X),
+      dBellOn: dAlert ? 'on' : '', dAlertLabel: dAlert ? 'Editar alerta' : 'Criar alerta',
+      dOpenAlert: () => (S.alertOpen === X ? this.setState({ alertOpen: null }) : this.openAlert(X)),
+      dAlertOpen: S.alertOpen === X && S.page === 'detail',
+      dHasAlert: !!al, dAlertCls: al ? al.cls : '', dAlertText: al ? al.text : '',
+      dConvTo: amts.map((a) => ({ a: this.nf(0).format(a) + ' ' + X, v: B.sym + ' ' + this.money(a * dv) })),
+      dConvBack: amts.map((a) => ({ a: this.nf(0).format(a) + ' ' + base, v: XC.sym + ' ' + this.money(a / dv) })),
+      dViews: D.views.filter((c) => c !== X).map((c) => {
+        const s = this.series(X, c), p = s[7] / s[6] - 1;
+        return {
+          code: c, name: D.by[c].name, val: D.by[c].sym + ' ' + this.fmt(T[c] / T[X]),
+          chg: this.pct(p), dir: this.dir(p), on: c === base, cls: c === base ? 'on' : '',
+          pick: () => this.pickBase(c)
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
